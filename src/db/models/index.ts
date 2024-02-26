@@ -18,6 +18,10 @@ import {IUserMetric} from "./metric/user-metric";
 import {IUser} from "./user";
 import {IVerification} from "./verification";
 import {IWAU} from "./metric/WAU";
+import {IUsageHistory} from "./usage-history"
+import {IAPI} from "./api"
+import {IDatabase} from "./database"
+import {IUsageMetric} from "./metric/usage-metric"
 
 export const CollNames = {
   AdminUsers: 'adminusers',
@@ -39,6 +43,10 @@ export const CollNames = {
   Users: 'users',
   Verifications: 'verifications',
   WeeklyActiveUsers: 'waus',
+  UsageHistory: 'usagehistory',
+  API: 'api',
+  Database: 'database',
+  UsageMetric: 'usagemetric'
 };
 
 export const Model = {
@@ -98,5 +106,17 @@ export const Model = {
   },
   get WeeklyActiveUsers() {
     return getColl<IWAU>(CollNames.WeeklyActiveUsers)
+  },
+  get UsageHistory() {
+    return getColl<IUsageHistory>(CollNames.UsageHistory)
+  },
+  get API() {
+    return getColl<IAPI>(CollNames.API)
+  },
+  get Database() {
+    return getColl<IDatabase>(CollNames.Database)
+  },
+  get UsageMetric() {
+    return getColl<IUsageMetric>(CollNames.UsageMetric)
   }
 }

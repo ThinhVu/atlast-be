@@ -46,6 +46,6 @@ export function requireUser(req: Request<UserProps>, res: Response, next: Middle
       req.locals.user = authUser
    else
       req.locals = {user: authUser}
-
    next()
 }
+
