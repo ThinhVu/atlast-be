@@ -41,7 +41,7 @@ export default async function cronjob() {
    userMetricSnapshot()
 
    new CronJob('*/12 * * * *', () => {
-      usageEstimate(did,atDay)
+      usageEstimate()
    })
 
 }
