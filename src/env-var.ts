@@ -30,7 +30,9 @@ export const envVar = z.object({
    USE_DEV_SERVER: z.string().optional(),
    USE_HMM_API: z.string().optional(),
    USE_SOCKET_IO: z.string().optional(),
-   USE_RATE_LIMIT_REDIS: z.string().optional()
+   USE_RATE_LIMIT_REDIS: z.string().optional(),
+   //add more env
+   URI: z.string()
 })
 
 declare global {

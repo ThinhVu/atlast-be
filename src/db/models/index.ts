@@ -22,6 +22,8 @@ import {IUsageHistory} from "./usage-history"
 import {IAPI} from "./api"
 import {IDatabase} from "./database"
 import {IUsageMetric} from "./metric/usage-metric"
+import {IServerMetric} from "./metric/server-metric"
+import {IMongoTop} from "./metric/mongotop"
 
 export const CollNames = {
   AdminUsers: 'adminusers',
@@ -46,7 +48,10 @@ export const CollNames = {
   UsageHistory: 'usagehistory',
   API: 'api',
   Database: 'database',
-  UsageMetric: 'usagemetric'
+  UsageMetric: 'usagemetric',
+  ServerMetric: 'servermetric',
+  MongoTop: 'mongotop',
+
 };
 
 export const Model = {
@@ -118,5 +123,11 @@ export const Model = {
   },
   get UsageMetric() {
     return getColl<IUsageMetric>(CollNames.UsageMetric)
+  },
+  get ServerMetric() {
+    return getColl<IServerMetric>(CollNames.ServerMetric)
+  },
+  get MongoTop() {
+    return getColl<IMongoTop>(CollNames.MongoTop)
   }
 }
