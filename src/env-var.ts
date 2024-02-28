@@ -32,7 +32,7 @@ export const envVar = z.object({
    USE_SOCKET_IO: z.string().optional(),
    USE_RATE_LIMIT_REDIS: z.string().optional(),
    //add more env
-   URI: z.string()
+   USE_RUN_DB_CMD: z.string().optional(),
 })
 
 declare global {

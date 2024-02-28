@@ -18,12 +18,13 @@ import {IUserMetric} from "./metric/user-metric";
 import {IUser} from "./user";
 import {IVerification} from "./verification";
 import {IWAU} from "./metric/WAU";
-import {IUsageHistory} from "./usage-history"
-import {IAPI} from "./api"
+import {IDbUsageHistory} from "./db-usage-history"
+import {IDbApiKey} from "./db-api-key"
 import {IDatabase} from "./database"
 import {IUsageMetric} from "./metric/usage-metric"
-import {IServerMetric} from "./metric/server-metric"
+import {IMongoStats} from "./metric/mongostats"
 import {IMongoTop} from "./metric/mongotop"
+import {IDbUser} from "./db-user"
 
 export const CollNames = {
   AdminUsers: 'adminusers',
@@ -45,13 +46,13 @@ export const CollNames = {
   Users: 'users',
   Verifications: 'verifications',
   WeeklyActiveUsers: 'waus',
-  UsageHistory: 'usagehistory',
-  API: 'api',
+  DbUsageHistory: 'usagehistory',
+  DbApiKey: 'dbapikey',
   Database: 'database',
   UsageMetric: 'usagemetric',
-  ServerMetric: 'servermetric',
+  MongoStats: 'mongostats',
   MongoTop: 'mongotop',
-
+  DbUser: "dbuser",
 };
 
 export const Model = {
@@ -112,11 +113,11 @@ export const Model = {
   get WeeklyActiveUsers() {
     return getColl<IWAU>(CollNames.WeeklyActiveUsers)
   },
-  get UsageHistory() {
-    return getColl<IUsageHistory>(CollNames.UsageHistory)
+  get DbUsageHistory() {
+    return getColl<IDbUsageHistory>(CollNames.DbUsageHistory)
   },
-  get API() {
-    return getColl<IAPI>(CollNames.API)
+  get DbApiKey() {
+    return getColl<IDbApiKey>(CollNames.DbApiKey)
   },
   get Database() {
     return getColl<IDatabase>(CollNames.Database)
@@ -124,10 +125,14 @@ export const Model = {
   get UsageMetric() {
     return getColl<IUsageMetric>(CollNames.UsageMetric)
   },
-  get ServerMetric() {
-    return getColl<IServerMetric>(CollNames.ServerMetric)
+  get MongoStats() {
+    return getColl<IMongoStats>(CollNames.MongoStats)
   },
   get MongoTop() {
     return getColl<IMongoTop>(CollNames.MongoTop)
+  },
+  get DbUser() {
+    return getColl<IDbUser>(CollNames.DbUser)
   }
+
 }

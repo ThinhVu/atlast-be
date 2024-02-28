@@ -5,9 +5,10 @@ import {ObjectId} from "mongodb";
 import {MongoClient, Db} from 'mongodb';
 let client: MongoClient, db: Db;
 
-export async function getTopMetricNow() {
+//loại bỏ connection to mongodb, xem cách để chèn hàm connect (trong file mongodb để kết nối)
+
+export async function getCurrentMongoTop() {
     try {
-        client = new MongoClient(process.env.URI)
         const mongoTop = await client.db('admin').command({top: 1});
         const topStats = mongoTop.totals;
         const result = [];
@@ -30,9 +31,9 @@ export async function getTopMetricNow() {
 }
 
 export async function snapshot() {
-    const topMetric = await getTopMetricNow()
-    for (const top in topMetric) {
-        const updateData = topMetric[top];
+    const topMetrics = await getCurrentMongoTop()
+    for (const top in topMetrics) {
+        const updateData = topMetrics[top];
         await Model.MongoTop.updateOne({at: updateData.at, nameSpace: updateData.nameSpace}, {$set: updateData}, {upsert: true})
     }
 }

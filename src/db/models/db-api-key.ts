@@ -1,9 +1,9 @@
 import {ObjectId} from 'mongodb';
 import {Unique} from "../../utils/types";
 
-export type IAPI = Partial<{
+export type IDbApiKey = Partial<{
     _id: ObjectId,
-    value: Unique<string>,
+    key: Unique<string>,
     databaseId: ObjectId, //ref Database._id
     enable: boolean,
     createDt: Date,

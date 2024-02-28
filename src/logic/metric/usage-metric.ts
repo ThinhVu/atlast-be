@@ -5,27 +5,24 @@ import {ObjectId} from "mongodb";
 import {MongoClient, Db} from 'mongodb';
 let client: MongoClient, db: Db;
 
-
 export async function usageEstimate () {
-    const dataId = await Model.Database.aggregate([{
+    const databaseIds = await Model.Database.aggregate([{
         $group:{
             _id: "$_id"
         }
     }]).toArray();
 
-    for (const item of dataId) {
-        const did = item._id
-        const data = await Model.Database.findOne({_id:did});
-        if (data) {
-            const dbName = data.name;
-            //lấy hàm connect với database
+    for (const item of databaseIds) {
+        const id = item._id
+        const databaseDoc = await Model.Database.findOne({_id: id});
+        if (databaseDoc) {
+            const dbName = databaseDoc.name;
             try {
-                client = new MongoClient(process.env.URI)
                 db = client.db(dbName)
                 const statics = await db.stats({scale: 1024*1024*1024});
                 const useData = statics.totalSize
                 return Model.UsageMetric.updateOne(
-                    {databaseId:did, t: dayjs().startOf('day').toDate()},
+                    {databaseId: id, t: dayjs().startOf('day').toDate()},
                     {$set: {usage: useData}},
                     {upsert: true})
             } catch (error) {
@@ -33,7 +30,7 @@ export async function usageEstimate () {
                 process.exit(1)
             }
         } else {
-            console.log(`Database id ${did} doesn't exist!`);
+            console.log(`Database id ${id} doesn't exist!`);
         }
     }
 }

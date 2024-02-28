@@ -5,33 +5,36 @@ import {ObjectId} from "mongodb";
 import {type Request, type Response, type MiddlewareNext} from "hyper-express";
 import {Model} from "../db/models";
 
-interface Ivalid {
-    value: String,
+interface IValid {
+    key: String,
     enable: Boolean,
     databaseId: ObjectId,
+    dbName: String,
 }
 
 interface ApiProps {
-    api: Ivalid
+    api: IValid
 }
-export function validKey(req:Request<ApiProps>,res:Response,next:MiddlewareNext){
+export function validKey( req: Request<ApiProps>, res: Response, next: MiddlewareNext){
     //get api key of user
     const apiKey = req.headers['api-key'];
-    Model.API.findOne({value: apiKey}).then(async api => {
+    Model.DbApiKey.findOne({key: apiKey, enable: true}).then(async api => {
         if (!api) {
-            //check if apiKey is existed or not
-            console.log("API key doesn't exist!")
-        } else if (api.enable == false) {
-            //check if apiKey is enabled or not
-            console.log("API key wasn't enabled")
-        } else {
-            //if apiKey is existed and enable then
-            //get database name
-            const dataId = api.databaseId
-            const {name} = await Model.Database.findOne({_id: dataId})
-            return name
-            //add connection to client
+            next(new ApiError("E_000", "Invalid API key", 401))
+            return
         }
+        const databaseId = api.databaseId
+        const {name} = await Model.Database.findOne({_id: databaseId})
+        const authDbApi = {
+            key: apiKey,
+            databaseId: databaseId,
+            enable: true,
+            dbName: name,
+        }
+        if (req.locals)
+            req.locals.api = authDbApi
+        else
+            req.locals = { api: authDbApi }
         next()
-    })
+    }).catch(e => next(new ApiError("E_000", "Invalid API key", 401)))
 }
