@@ -2,12 +2,16 @@ import {ObjectId} from "mongodb";
 import {Indexed} from "../../../utils/types";
 import {ms} from "../../../utils/types";
 
+export interface ITopLock {
+    time: ms<number>,
+    count: number,
+}
 export type IMongoTop = Partial<{
     _id: ObjectId,
     nameSpace: string,
-    total: ms<number>,
-    read: ms<number>,
-    write: ms<number>,
+    total: ITopLock,
+    read: ITopLock,
+    write: ITopLock,
     at: Indexed<Date>
 }>
 

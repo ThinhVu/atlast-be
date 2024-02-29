@@ -7,22 +7,53 @@ let client: MongoClient, db: Db;
 
 //loại bỏ connection to mongodb, xem cách để chèn hàm connect (trong file mongodb để kết nối)
 
+let prevTopStats = {}
 export async function getCurrentMongoTop() {
     try {
-        const mongoTop = await client.db('admin').command({top: 1});
-        const topStats = mongoTop.totals;
+        const url = 'mongodb://localhost:27017'
+        const client = new MongoClient(url)
+        const db = client.db('admin')
+        const {totals} = await db.command({top: 1});
         const result = [];
-        for (const ns in topStats) {
+        for (const ns in totals) {
             if (ns !== "note") {
-                result.push({
-                    nameSpace: ns,
-                    total: topStats[ns].total.time,
-                    read: topStats[ns].readLock.time,
-                    write: topStats[ns].writeLock.time,
-                    at: dayjs().startOf('day').toDate()
-                })
+                const {writeLock, readLock, total} = totals[ns]
+                const totalTime = total.time;
+                const totalCount = total.count;
+                const writeTime = writeLock.time;
+                const writeCount = writeLock.count;
+                const readTime = readLock.time;
+                const readCount = readLock.count;
+
+                const prevStats = prevTopStats[ns] || totals[ns]
+
+                if (totalTime === prevStats.total.time) {
+                    result.push({
+                        nameSpace: ns,
+                        total: {time: 0, count: 0},
+                        read: {time: 0, count: 0},
+                        write: {time: 0, count: 0}
+                    })
+                } else {
+                    result.push({
+                        nameSpace: ns,
+                        total: {
+                            time: (totalTime - prevStats.total.time) / 1000,
+                            count: (totalCount - prevStats.total.count),
+                        },
+                        read: {
+                            time: (readTime - prevStats.readLock.time) / 1000,
+                            count: (readCount - prevStats.readLock.count),
+                        },
+                        write: {
+                            time: (writeTime - prevTopStats[ns].writeLock.time) / 1000,
+                            count: (writeCount - prevTopStats[ns].writeLock.count),
+                        },
+                    })
+                }
             }
         }
+        prevTopStats = totals;
         return result;
     } catch (error) {
         console.error('[mongodb] Failed to connect. Reason:', error)
