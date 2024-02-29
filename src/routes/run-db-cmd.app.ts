@@ -22,8 +22,8 @@ export default async function userRunCommand(app) {
                 const mongoClient = new MongoClient(`mongodb://${username}:${password}@${DATABASE_HOST}`)
                 const db = mongoClient.db(name);
                 dbDriverCache[key] = new Proxy({}, {
-                    get(target: {}, p: string | symbol, receiver: any): any {
-                        return db.collection(p as string)
+                    get(__, collectionName: string | symbol, ___): any {
+                        return db.collection(collectionName as string)
                     }
                 })
             }

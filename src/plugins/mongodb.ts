@@ -1,5 +1,4 @@
 import {MongoClient, Db, Collection} from 'mongodb';
-import {z} from "zod";
 
 let client: MongoClient, db: Db;
 
