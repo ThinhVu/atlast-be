@@ -1,4 +1,5 @@
 import {MongoClient, Db, Collection} from 'mongodb';
+import {z} from "zod";
 
 let client: MongoClient, db: Db;
 
@@ -8,11 +9,18 @@ export function getColl<TSchema = any>(name: string) : Collection<TSchema> {
 
 async function connect() {
    try {
-      const parts = process.env.DATABASE_URL.split('/')
-      const dbName = parts.length > 3 ? parts[3].split('?')[0] : 'test';
-      console.log(`[mongodb] Connecting to database ${dbName}`)
-      client = new MongoClient(process.env.DATABASE_URL);
-      db = client.db(dbName);
+      const {
+        DATABASE_HOST,
+        DATABASE_USERNAME,
+        DATABASE_PASSWORD,
+        DATABASE_NAME,
+      } = process.env;
+      console.log(`[mongodb] Connecting to database ${DATABASE_NAME}`)
+      const url = DATABASE_USERNAME
+        ? `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}`
+        : `mongodb://${DATABASE_HOST}`;
+      client = new MongoClient(url);
+      db = client.db(DATABASE_NAME);
       console.log('[mongodb] Connected to server!')
    } catch (error) {
       console.error('[mongodb] Failed to connect. Reason:', error)

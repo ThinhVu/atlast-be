@@ -21,7 +21,9 @@ export default async function hmm(app) {
       // add more models as you want
    })
    // json doesn't work well with date time, so we use bodyParser as raw just for hmm
-   app.post('/hmm', {middlewares: [requireAdmin]}, async (req: Request, res: Response) => {
+   app.post('/hmm',
+     {middlewares: [requireAdmin]},
+     async (req: Request, res: Response) => {
       const str = await req.text();
       const qry = jsonFn.parse(str, true);
       const rs = await hmm(qry)

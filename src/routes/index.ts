@@ -11,12 +11,12 @@ import useUser from "./user.route";
 import useHmmApp from './hmm.app';
 import useMetrics from './metrics.app';
 import useAppMetrics from './app-metric.route'
-import useEndUserHmm from './run-db-cmd.app'
+import useRunDbCmd from './run-db-cmd.app'
 import {Router} from "hyper-express";
 
 export default async function useRoutes(app) {
    await useHmmApp(app)
-   await useEndUserHmm(app)
+   await useRunDbCmd(app)
    await useMetrics(app)
 
    const router = new Router()

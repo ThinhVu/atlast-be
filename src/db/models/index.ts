@@ -24,7 +24,6 @@ import {IDatabase} from "./database"
 import {IUsageMetric} from "./metric/usage-metric"
 import {IMongoStats} from "./metric/mongostats"
 import {IMongoTop} from "./metric/mongotop"
-import {IDbUser} from "./db-user"
 
 export const CollNames = {
   AdminUsers: 'adminusers',
@@ -52,7 +51,6 @@ export const CollNames = {
   UsageMetric: 'usagemetric',
   MongoStats: 'mongostats',
   MongoTop: 'mongotop',
-  DbUser: "dbuser",
 };
 
 export const Model = {
@@ -130,9 +128,5 @@ export const Model = {
   },
   get MongoTop() {
     return getColl<IMongoTop>(CollNames.MongoTop)
-  },
-  get DbUser() {
-    return getColl<IDbUser>(CollNames.DbUser)
   }
-
 }

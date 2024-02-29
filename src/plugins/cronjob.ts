@@ -37,16 +37,7 @@ export default async function cronjob() {
       userMetricSnapshot()
    }, null, true)
 
-   appMetricSnapshot()
-   userMetricSnapshot()
-
-
-
    //cronjob get totalSize of each Database in replicaSet per day
-
-   new CronJob('0 0 * * *', () => {
-      usageEstimate()
-   },null,true)
-   usageEstimate()
+   new CronJob('0 0 * * *', usageEstimate, null, true)
 }
 
