@@ -1,6 +1,5 @@
 import {CronJob} from "cron";
 import {snapshot as appMetricSnapshot} from "../logic/metric/app-metric";
-import {snapshot as userMetricSnapshot} from "../logic/metric/user-metric";
 import appHook from "../logic/hooks";
 import {getLogger} from "../utils/logger";
 import {Model} from "../db/models";
@@ -34,7 +33,6 @@ export default async function cronjob() {
    const runDailyAtNight = '50 11 * * *'
    new CronJob(runDailyAtNight, () => {
       appMetricSnapshot()
-      userMetricSnapshot()
    }, null, true)
 
    //cronjob get totalSize of each Database in replicaSet per day

@@ -10,14 +10,10 @@ export default async function hmm(app) {
    console.log('[app-route] hmm')
    const hmm = hmmExecFactory({
       announcement: Model.Announcements,
-      dau: Model.DailyActiveUsers,
       healthCheck: Model.HealthChecks,
       kv: Model.KVs,
-      mau: Model.MonthlyActiveUsers,
       task: Model.Tasks,
       user: Model.Users,
-      userMetric: Model.UserMetrics,
-      wau: Model.WeeklyActiveUsers,
       // add more models as you want
    })
    // json doesn't work well with date time, so we use bodyParser as raw just for hmm

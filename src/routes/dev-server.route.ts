@@ -5,14 +5,12 @@ import $ from "../utils/safe-call"
 import {Request, Router} from 'hyper-express';
 import {rateLimitByIp} from "../middlewares/rate-limit";
 import {requireUser, UserProps} from "../middlewares/auth";
-import {logLogin} from "../logic/metric/user-login-history";
-import {snapshot} from "../logic/metric/user-metric";
 import {ApiError} from "../utils/common-util";
-import {getRandomSubarray, randomNumberInRange} from "../utils/random-util";
+import {randomNumberInRange} from "../utils/random-util";
 import {delay, m2ms} from "../utils/date-time-util";
 import {Model} from "../db/models";
 import {defaultUserInfo} from "../logic/user";
-import {sendApn, sendFcm, volatileNotifyUser} from "../logic/notification";
+import {volatileNotifyUser} from "../logic/notification";
 import DataParser from "../utils/data-parser";
 import {IVerification, VrfType} from "../db/models/verification";
 
@@ -20,7 +18,6 @@ async function initUser(uptimeByDay: number) {
    console.log('[dev-server] init user')
    const password = await bcrypt.hash('123ASD!@#', 10)
    let userIndex = 1;
-   const totalUsers = []
    const now = dayjs()
    for (let i = uptimeByDay; i >= 0; i--) {
       const date = now.subtract(i, 'day').toDate()
@@ -42,20 +39,8 @@ async function initUser(uptimeByDay: number) {
          userIndex++;
       }
       console.log(beauDate, newUsers.length, 'new users')
-      const {insertedIds} = await Model.Users.insertMany(newUsers)
-      const docs = Object.values(insertedIds)
-      for (let i = 0; i < docs.length; ++i) {
-         totalUsers.push({_id: docs[i]})
-      }
-      const userIds = totalUsers.map(u => u._id)
-      const loginNr = Math.round(userIds.length * .25 + Math.random() * userIds.length * 0.75)
-      const loginUids = getRandomSubarray(userIds, loginNr)
-      console.log(beauDate, loginUids.length, '/', totalUsers.length, 'logged in')
-      for (const uid of loginUids)
-         await logLogin(uid, date)
-      console.log(beauDate, 'creating user metric snapshot')
+      await Model.Users.insertMany(newUsers)
       await delay(100)
-      await snapshot(date)
    }
    console.log('[dev-server] init user completed')
 }
@@ -65,7 +50,6 @@ async function cleanup() {
    await Model.Notifications.deleteMany({test: true})
    await Model.Users.deleteMany({test: true})
    await Model.Verifications.deleteMany({test: true})
-   await Model.UserLoginHistories.deleteMany()
 }
 
 export default async function useDevServer(parentRouter: Router) {
@@ -123,16 +107,6 @@ export default async function useDevServer(parentRouter: Router) {
       const {userIds, event, data} = await req.json()
       const userObjectIds = _.map(userIds, id => DataParser.objectId(id))
       return volatileNotifyUser(userObjectIds, event, data)
-   }))
-
-   router.post('/notification/apn', $(async (req: Request) => {
-      const {token} = await req.json()
-      return await sendApn([token], {notification: {title: 'title', body: 'body'}, data: {age: 30, name: 'Josh'}})
-   }))
-
-   router.post('/notification/fcm', $(async (req: Request) => {
-      const {token} = await req.json()
-      return await sendFcm([token], {notification: {title: 'title', body: 'body'}, data: {age: 30, name: 'Josh'}})
    }))
 
    parentRouter.use('/dev-server', router)
