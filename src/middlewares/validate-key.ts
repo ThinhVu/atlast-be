@@ -1,40 +1,23 @@
 import {ApiError} from "../utils/common-util";
-import {parseAuthorization} from "../utils/auth-util";
-import To from "../utils/data-parser";
-import {ObjectId} from "mongodb";
 import {type Request, type Response, type MiddlewareNext} from "hyper-express";
 import {Model} from "../db/models";
+import {IDbApiKey} from "../db/models/db-api-key";
 
-interface IValid {
-    key: String,
-    enable: Boolean,
-    databaseId: ObjectId,
-    dbName: String,
-}
-
-interface ApiProps {
-    api: IValid
+export interface ApiProps {
+    dbApiKey: IDbApiKey
 }
 export function validKey( req: Request<ApiProps>, res: Response, next: MiddlewareNext){
     //get api key of user
     const apiKey = req.headers['api-key'];
-    Model.DbApiKey.findOne({key: apiKey, enable: true}).then(async api => {
-        if (!api) {
+    Model.DbApiKey.findOne({key: apiKey, enable: true}).then(async doc => {
+        if (!doc) {
             next(new ApiError("E_000", "Invalid API key", 401))
             return
         }
-        const databaseId = api.databaseId
-        const {name} = await Model.Database.findOne({_id: databaseId})
-        const authDbApi = {
-            key: apiKey,
-            databaseId: databaseId,
-            enable: true,
-            dbName: name,
-        }
         if (req.locals)
-            req.locals.api = authDbApi
+            req.locals.dbApiKey = doc
         else
-            req.locals = { api: authDbApi }
+            req.locals = { dbApiKey: doc }
         next()
     }).catch(e => next(new ApiError("E_000", "Invalid API key", 401)))
 }

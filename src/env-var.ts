@@ -2,7 +2,10 @@ import {z} from "zod";
 export const envVar = z.object({
    ADMIN_CODE: z.string(),
    PERF_BOOST: z.string().optional(), // should apply extra algorithms to reduce cpu workload
-   DATABASE_URL: z.string(),
+   DATABASE_HOST: z.string(),
+   DATABASE_USERNAME: z.string().optional(),
+   DATABASE_PASSWORD: z.string().optional(),
+   DATABASE_NAME: z.string(),
    DISCORD_WEBHOOK_URL: z.string().optional(),
    EMAIL_HOST: z.string().optional(),
    EMAIL_PORT: z.string().optional(),
@@ -31,8 +34,6 @@ export const envVar = z.object({
    USE_HMM_API: z.string().optional(),
    USE_SOCKET_IO: z.string().optional(),
    USE_RATE_LIMIT_REDIS: z.string().optional(),
-   //add more env
-   USE_RUN_DB_CMD: z.string().optional(),
 })
 
 declare global {

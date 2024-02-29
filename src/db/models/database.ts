@@ -8,6 +8,5 @@ export type IDatabase = Partial<{
     password: string,
     sizeInGB: number,
     metrics: Object,
-    collections: string[],
     createDt: Date
 }>
