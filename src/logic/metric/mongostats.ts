@@ -26,7 +26,7 @@ export async function getCurrentMongoStats() {
     }
 }
 
-export async function snapshot() {
+export async function getCurrentSnapshot() {
     const mongoStats = await getCurrentMongoStats()
     const updateData = {
         opCounters: mongoStats.opCounts,
@@ -43,6 +43,13 @@ export async function snapshot() {
     await Model.MongoStats.updateOne({at: mongoStats.at}, {$set: updateData}, {upsert: true})
 }
 
-//next step
-//write function to get server metric each 5 seconds when an event occur
-//or a condition meets requirement
+export async function snapshot() {
+    const intervalId = setInterval(function() {
+        getCurrentSnapshot();
+        if (close) {
+            clearInterval(intervalId);
+        }
+    }, 1000);
+}
+
+//thiết lập giá trị close thông qua một hàm isClose

@@ -21,7 +21,7 @@ export default async function userRunCommand(app) {
             const key = collections[col];
             cols[key] = db.collection(key);
         }
-        const hmm = hmmExecFactory({cols});
+        const hmm = hmmExecFactory(cols);
         const str = await req.text();
         const qry = jsonFn.parse(str, true);
         const rs = await hmm(qry)
