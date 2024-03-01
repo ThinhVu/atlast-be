@@ -3,6 +3,7 @@ import {getLogger} from "../../utils/logger";
 import {Model} from "../../db/models";
 import {ObjectId} from "mongodb";
 import {MongoClient, Db} from 'mongodb';
+import {snapshot} from "./mongotop";
 let client: MongoClient, db: Db;
 
 export async function getCurrentMongoStats() {
@@ -43,13 +44,17 @@ export async function getCurrentSnapshot() {
     await Model.MongoStats.updateOne({at: mongoStats.at}, {$set: updateData}, {upsert: true})
 }
 
-export async function snapshot() {
-    const intervalId = setInterval(function() {
-        getCurrentSnapshot();
-        if (close) {
-            clearInterval(intervalId);
-        }
-    }, 1000);
+let mongoStatsInterval;
+export function startMongoStats() {
+    try {
+        mongoStatsInterval = setInterval(async () => {
+            await getCurrentSnapshot();
+        }, 5000);
+    } catch (error) {
+        console.error('Error starting Mongotop:', error);
+    }
 }
 
-//thiết lập giá trị close thông qua một hàm isClose
+export function stopMongoStats() {
+    clearInterval(mongoStatsInterval);
+}

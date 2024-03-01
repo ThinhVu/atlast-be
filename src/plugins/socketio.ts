@@ -8,6 +8,8 @@ import appHook from "../logic/hooks"
 import * as process from "process";
 import {Model} from "../db/models";
 import {getColl} from "./mongodb";
+import {startMongoTop, stopMongoTop} from "../logic/metric/mongotop";
+import {startMongoStats, stopMongoStats} from "../logic/metric/mongostats";
 
 /**
  * https://socket.io/docs/v4/migrating-from-3-x-to-4-0/#the-default-value-of-pingtimeout-was-increased
@@ -181,6 +183,40 @@ async function createSocketServer(app) {
 
       socket.emit("__TEST__", "__TEST__")
    });
+
+   //update socket io to get mongotop and mongostats
+
+   const mongoTopNs = io.of('/mongotop');
+   mongoTopNs.on('connection', (socket: Socket) => {
+      console.log('Connecting');
+
+      socket.on('startMongoTop', () => {
+         console.log('Starting getting mongoTop');
+         startMongoTop();
+      });
+
+      socket.on('stopMongoTop', () => {
+         console.log('Stopping getting mongoTop');
+         stopMongoTop();
+      });
+   });
+
+   const mongoStatsNs = io.of('/mongostats');
+
+   mongoStatsNs.on('connection', (socket: Socket) => {
+      console.log('Connecting');
+
+      socket.on('startMongoStats', () => {
+         console.log('Start getting mongostats');
+         startMongoStats();
+      });
+
+      socket.on('stopMongoStats', () => {
+         console.log('Stop getting mongostats');
+         stopMongoStats();
+      });
+   });
+
 
    return io
 }

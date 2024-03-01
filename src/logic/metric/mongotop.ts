@@ -3,15 +3,15 @@ import {getLogger} from "../../utils/logger";
 import {Model} from "../../db/models";
 import {ObjectId} from "mongodb";
 import {MongoClient, Db} from 'mongodb';
+import { Server, Socket } from 'socket.io';
+
 let client: MongoClient, db: Db;
 
-//loại bỏ connection to mongodb, xem cách để chèn hàm connect (trong file mongodb để kết nối)
+
 
 let prevTopStats = {}
 export async function getCurrentMongoTop() {
     try {
-        const url = 'mongodb://localhost:27017'
-        const client = new MongoClient(url)
         const db = client.db('admin')
         const {totals} = await db.command({top: 1});
         const result = [];
@@ -69,7 +69,19 @@ export async function snapshot() {
     }
 }
 
+//set interval for snapshot()
+let mongoTopInterval;
 
-//next step
-//write function to get mongotop metric each 5 seconds when an event occur
-//or a condition meets requirement
+export function startMongoTop() {
+    try {
+        mongoTopInterval = setInterval(async () => {
+            await snapshot();
+        }, 5000);
+    } catch (error) {
+        console.error('Error starting Mongotop:', error);
+    }
+}
+
+export function stopMongoTop() {
+    clearInterval(mongoTopInterval);
+}
