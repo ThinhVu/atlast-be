@@ -7,8 +7,8 @@ export type IUser = Partial<{
    emailVerified: boolean;
    password: string;
    createdAt: Indexed<Date>;
-   fcm: string[];
-   apn: string[];
+   OAuthProvider: string;
+   OAuthUserId: string;
    // extra info
    balance: number,
    // dev

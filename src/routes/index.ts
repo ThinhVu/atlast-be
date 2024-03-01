@@ -5,7 +5,6 @@ import useFolder from "./folder.route";
 import useHealthCheck from "./health-check.route";
 import useI18n from "./i18n.route";
 import useKv from "./kv.route";
-import useUserMetric from "./user-metric.route";
 import useNotification from "./notification.route";
 import useUser from "./user.route";
 import useHmmApp from './hmm.app';
@@ -23,7 +22,6 @@ export default async function useRoutes(app) {
    await useHealthCheck(router)
    await useDevServer(router)
    await useI18n(router)
-   await useUserMetric(router)
    await useAdmin(router)
    await useFile(router)
    await useFolder(router)
