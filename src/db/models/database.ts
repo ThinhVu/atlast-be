@@ -1,12 +1,25 @@
 import {ObjectId} from 'mongodb';
+import {Gb} from "../../utils/types";
+import {Indexed} from "../../utils/types";
 
 export type IDatabase = Partial<{
     _id: ObjectId,
-    userId: ObjectId, //ref: User._id
+    userId: Indexed<ObjectId>, //ref: User._id
     name: string,
     username: string,
     password: string,
     sizeInGB: number,
     metrics: Object,
     createDt: Date
+}>
+
+export type IDatabaseInfo = Partial<{
+    _id: ObjectId,
+    databaseId: ObjectId, // ref Database._id
+    storageSize: Gb<number>,
+    collections: number,
+    objects: number,
+    dataSize: Gb<number>,
+    indexes: number,
+    indexSize: Gb<number>,
 }>

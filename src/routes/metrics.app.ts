@@ -1,9 +1,7 @@
 import { collectDefaultMetrics, register } from 'prom-client';
 import {Request, Response} from "hyper-express";
 import {Router} from "hyper-express";
-import { Server, Socket } from 'socket.io';
-import {startMongoTop, stopMongoTop} from '../logic/metric/mongotop'
-import {startMongoStats, stopMongoStats} from '../logic/metric/mongostats'
+
 
 
 
