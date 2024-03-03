@@ -10,6 +10,7 @@ import useUser from "./user.route";
 import useHmmApp from './hmm.app';
 import useMetrics from './metrics.app';
 import useAppMetrics from './app-metric.route'
+import useDatabase from "./database.route";
 import useRunDbCmd from './run-db-cmd.app'
 import {Router} from "hyper-express";
 
@@ -29,6 +30,7 @@ export default async function useRoutes(app) {
    await useNotification(router)
    await useUser(router)
    await useAppMetrics(router)
+   await useDatabase(router)
 
    app.use('/', router)
 }
