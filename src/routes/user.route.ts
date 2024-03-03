@@ -13,7 +13,6 @@ import {
 import {ApiError} from "../utils/common-util";
 import {VrfType} from "../db/models/verification";
 import {genToken, parseAuthorization} from "../utils/auth-util";
-import To from "../utils/data-parser";
 import {buildEmailPayload, sendEmail} from "../utils/email-util";
 import {Router, Request} from 'hyper-express';
 import $ from "../utils/safe-call";
@@ -39,72 +38,6 @@ export default async function useUser(parentRouter: Router) {
   const router = new Router();
 
   //region Auth
-  const upsertVerifyCode = async ({locale, email}): Promise<CreateVerifyCodeResult> => {
-    const code = generateCode()
-    const issueDate = new Date()
-    const expiredDate = dayjs().add(5, 'minute').toDate()
-    const i18nMessage = i18n[locale || 'vi'];
-    await sendEmail(buildEmailPayload({
-      to: email,
-      subject: i18nMessage["EmailVerification_Subject"],
-      content: i18nMessage["EmailVerification_Content"].replace("{{email}}", email).replace("{{code}}", code)
-    }))
-    await Model.Verifications.updateOne({target: email}, {$set: {
-        type: VrfType.VerifyEmail,
-        code,
-        issueDate,
-        expiredDate
-      }}, {upsert: true})
-    return {issueDate, expiredDate}
-  }
-  const upsertResetPasswordVerifyCode = async ({locale, email}): Promise<CreateVerifyCodeResult> => {
-    const code = generateCode();
-    const issueDate = new Date()
-    const expiredDate = dayjs().add(5, 'minute').toDate()
-    const i18nMessage = i18n[locale] || i18n['vi'];
-    await sendEmail(buildEmailPayload({
-      to: email,
-      subject: i18nMessage["ResetPassword_Subject"],
-      content: i18nMessage["ResetPassword_Content"].replace('{{user}}', email).replace('{{code}}', code)
-    }))
-    await Model.Verifications.updateOne({
-      type: VrfType.ResetPasswordByEmail,
-      target: email,
-    }, {$set: {
-        code,
-        issueDate,
-        expiredDate
-      }}, {upsert: true})
-    return {issueDate, expiredDate}
-  };
-
-  type RequestVerificationResponse =
-    {
-      verified: boolean
-    }
-    | {
-    expiredDate: Date,
-    issueDate: Date,
-    sent: boolean
-  }
-  router.get('/request-email-verification-code', {
-    middlewares: [await rateLimitByIp({windowMs: m2ms(10), max: 60})]
-  }, $<RequestVerificationResponse>(async (req) => {
-    const email = req.query_parameters.email as string;
-    if (_.isEmpty(email)) throw new ApiError('E_001', 'missing email')
-    if (isEmailInvalid(email)) throw new ApiError('E_003', 'invalid email')
-    if (await isEmailHaveBeenUsed(email)) throw new ApiError('E_004', 'email has been used')
-    const qry = {target: email, type: VrfType.VerifyEmail}
-    const vrf = await Model.Verifications.findOne(qry)
-    let respData: CreateVerifyCodeResult;
-    if (!vrf || dayjs(vrf.expiredDate).isBefore(dayjs())) {
-      respData = await upsertVerifyCode({email, locale: To.str(req.query_parameters.locale)})
-    } else {
-      respData = {issueDate: new Date(), expiredDate: vrf.expiredDate}
-    }
-    return {sent: true, ...respData}
-  }))
-
   type AuthResponse = {
     user: IUser,
     token: string
@@ -112,37 +45,17 @@ export default async function useUser(parentRouter: Router) {
   router.post('/sign-up', {
     middlewares: [await rateLimitByIp({windowMs: m2ms(10), max: 60})]
   }, $<AuthResponse>(async (req, res) => {
-    const {email, password, code, adminCode} = await req.json();
-    if (_.isEmpty(email))
-      throw new ApiError('E_015', 'missing email/phone')
-    if (_.isEmpty(password))
-      throw new ApiError('E_002', 'missing pwd')
-    if (_.isEmpty(code))
-      throw new ApiError('E_008', 'missing code')
-    if (isEmailInvalid(email))
-      throw new ApiError('E_003', 'invalid email')
-    if (await isEmailHaveBeenUsed(email))
-      throw new ApiError('E_004', 'email existed')
-    validatePassword(password)
-    if (adminCode !== process.env.ADMIN_CODE) {
-      const qry = {type: VrfType.VerifyEmail, target: email, code}
-      const vrf = await Model.Verifications.findOne(qry)
-      if (!vrf)
-        throw new ApiError('E_011', 'invalid verification code')
-      if (dayjs(vrf.expiredDate).isBefore(dayjs()))
-        throw new ApiError('E_011', 'verification code expired')
-      await Model.Verifications.deleteOne({_id: vrf._id})
-    }
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await createUser({
-      email,
-      password: passwordHash,
-      emailVerified: !_.isEmpty(email)
-    })
+    const {email, password} = await req.json();
+    if (_.isEmpty(email)) throw new ApiError('E_015', 'missing email')
+    if (_.isEmpty(password)) throw new ApiError('E_002', 'missing pwd')
+    if (isEmailInvalid(email)) throw new ApiError('E_003', 'invalid email')
+    if (await isEmailHaveBeenUsed(email)) throw new ApiError('E_004', 'email existed')
+    const passwordHash = await bcrypt.hash(password, 10)
+    const user = await createUser({email, password: passwordHash})
     const token = genToken(user)
     res.cookie('token', token)
     return {user, token}
-  }));
+  }))
 
   router.post('/sign-in', {
     middlewares: [await rateLimitByIp({windowMs: m2ms(10), max: 60})]
@@ -215,8 +128,6 @@ export default async function useUser(parentRouter: Router) {
   router.post('/sign-out', {
     middlewares: [requireUser, await rateLimitByIp({windowMs: m2ms(10), max: 60})]
   }, $<boolean>(async (req: Request<UserProps>, res) => {
-    const {fcm, apn} = await req.json()
-    await updateUser(req.locals.user._id, {$pull: {fcm, apn}})
     if (req.cookies['token'])
       res.clearCookie('token')
     return true
@@ -257,6 +168,26 @@ export default async function useUser(parentRouter: Router) {
     return {user, token: authToken}
   }))
 
+  const upsertResetPasswordVerifyCode = async ({locale, email}): Promise<CreateVerifyCodeResult> => {
+    const code = generateCode();
+    const issueDate = new Date()
+    const expiredDate = dayjs().add(5, 'minute').toDate()
+    const i18nMessage = i18n[locale] || i18n['vi'];
+    await sendEmail(buildEmailPayload({
+      to: email,
+      subject: i18nMessage["ResetPassword_Subject"],
+      content: i18nMessage["ResetPassword_Content"].replace('{{user}}', email).replace('{{code}}', code)
+    }))
+    await Model.Verifications.updateOne({
+      type: VrfType.ResetPasswordByEmail,
+      target: email,
+    }, {$set: {
+        code,
+        issueDate,
+        expiredDate
+      }}, {upsert: true})
+    return {issueDate, expiredDate}
+  };
   router.post('/forgot-password', {
     middlewares: [await rateLimitByIp({windowMs: m2ms(10), max: 60})]
   }, $(async (req) => {
