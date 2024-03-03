@@ -71,44 +71,6 @@ export default async function useUser(parentRouter: Router) {
     const token = genToken(user)
     res.cookie('token', token)
     return {user, token}
-  }));
-
-  router.post('/oauth', {
-    middlewares: [await rateLimitByIp({windowMs: m2ms(10), max: 60})]
-  }, $<AuthResponse | {
-    mode: string
-  }>(async (req, res) => {
-    const payload = await req.json()
-    const {ProviderId} = payload
-    switch (ProviderId) {
-      case "firebase":
-      case "google.com": {
-        const {UserId, Email} = payload;
-        const OAuthUserId = _.trim(UserId)
-        const email = _.trim(Email)
-        if (_.isEmpty(email)) throw new ApiError('E_000', 'missing email')
-        if (isEmailInvalid(email)) throw new ApiError('E_003', 'invalid email')
-        let mode: string;
-        let user: IUser = await Model.Users.findOne({OAuthProvider: ProviderId, OAuthUserId})
-        if (user) {
-          mode = 'signIn'
-        } else {
-          user = await createUser({
-            email,
-            emailVerified: !!email,
-            password: await bcrypt.hash(OAuthUserId, 10),
-            OAuthProvider: ProviderId,
-            OAuthUserId
-          })
-          mode = 'signUp'
-        }
-        const token = genToken(user)
-        res.cookie('token', token)
-        return {user, token, mode}
-      }
-      default:
-        throw new ApiError("E_000", 'not supported provider')
-    }
   }))
 
   router.get('/auth', {
