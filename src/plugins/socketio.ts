@@ -181,42 +181,28 @@ async function createSocketServer(app) {
          }, SOCKET_PING_TIMEOUT_IN_MS)
       });
 
-      socket.emit("__TEST__", "__TEST__")
-   });
-
-   //update socket io to get mongotop and mongostats
-
-   const mongoTopNs = io.of('/mongotop');
-   mongoTopNs.on('connection', (socket: Socket) => {
-      console.log('Connecting');
-
       socket.on('startMongoTop', () => {
          console.log('Starting getting mongoTop');
          startMongoTop();
-      });
+      })
 
       socket.on('stopMongoTop', () => {
          console.log('Stopping getting mongoTop');
          stopMongoTop();
-      });
-   });
-
-   const mongoStatsNs = io.of('/mongostats');
-
-   mongoStatsNs.on('connection', (socket: Socket) => {
-      console.log('Connecting');
+      })
 
       socket.on('startMongoStats', () => {
          console.log('Start getting mongostats');
          startMongoStats();
-      });
+      })
 
       socket.on('stopMongoStats', () => {
          console.log('Stop getting mongostats');
          stopMongoStats();
-      });
-   });
+      })
 
+      socket.emit("__TEST__", "__TEST__")
+   });
 
    return io
 }
