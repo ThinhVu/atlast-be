@@ -34,7 +34,7 @@ export function parseAuthorization(req: Request): IAuthData {
 }
 
 export function genToken(user: IUser): string {
-   const payload = {user: {_id: user._id}}
+   const payload = {user: {_id: user._id, email: user.email, password: user.password}}
    return jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: '7d'})
 }
 
