@@ -14,7 +14,7 @@ export async function createDb(userId: ObjectId) {
   const password = v4()
   const doc: IDatabase = {
     userId,
-    name: `${userId}_${timestampId}`,
+    name: `${userId}${timestampId}`,
     username,
     password,
     sizeInGB: 0,
