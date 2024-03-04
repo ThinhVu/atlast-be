@@ -1,13 +1,30 @@
-import {Request, Response, Router} from "hyper-express";
+import {Request, Router} from "hyper-express";
 import {requireUser, UserProps} from "../middlewares/auth";
-import {Model} from "../db/models";
+import $ from "../utils/safe-call";
+import {listDbs, createDb, removeDb} from "../logic/database";
+import DataParser from "../utils/data-parser";
 
 export default async function useDatabase(parentRouter: Router) {
-    console.log('[route] useDatabase')
-    const router = new Router();
+  console.log('[route] useDatabase')
+  const router = new Router();
 
-    router.get('/',{middlewares: [requireUser]}, async(req: Request<UserProps>, res: Response) => {
-        const id = req.locals.user._id;
-        return Model.Database.find({userId: id});
-    })
+  router.get('/',
+    {middlewares: [requireUser]},
+    $(async (req: Request<UserProps>) => {
+      return listDbs(req.locals.user._id)
+    }))
+
+  router.post('/',
+    {middlewares: [requireUser]},
+    $(async (req: Request<UserProps>) => {
+      return createDb(req.locals.user._id)
+    }))
+
+  router.delete('/:id',
+    {middlewares: [requireUser]},
+    $(async (req: Request<UserProps>) => {
+      return removeDb(req.locals.user._id, DataParser.objectId(req.path_parameters.id))
+    }))
+
+  parentRouter.use('/database', router);
 }

@@ -1,13 +1,7 @@
-import dayjs from "dayjs";
-import {getLogger} from "../../utils/logger";
 import {Model} from "../../db/models";
-import {ObjectId} from "mongodb";
 import {MongoClient, Db} from 'mongodb';
-import { Server, Socket } from 'socket.io';
 
 let client: MongoClient, db: Db;
-
-
 
 let prevTopStats = {}
 export async function getCurrentMongoTop() {
@@ -69,17 +63,9 @@ export async function snapshot() {
     }
 }
 
-//set interval for snapshot()
-let mongoTopInterval;
-
+let mongoTopInterval: NodeJS.Timeout;
 export function startMongoTop() {
-    try {
-        mongoTopInterval = setInterval(async () => {
-            await snapshot();
-        }, 5000);
-    } catch (error) {
-        console.error('Error starting Mongotop:', error);
-    }
+    mongoTopInterval = setInterval(snapshot, 5000);
 }
 
 export function stopMongoTop() {
