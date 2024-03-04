@@ -1,7 +1,6 @@
 import {Request, Response, Router} from "hyper-express";
 import {requireUser, UserProps} from "../middlewares/auth";
 import {Model} from "../db/models";
-import {FindOptions, Document} from 'mongodb';
 
 export default async function useDatabase(parentRouter: Router) {
     console.log('[route] useDatabase')
