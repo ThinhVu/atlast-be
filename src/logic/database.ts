@@ -3,6 +3,9 @@ import {v4} from "uuid";
 import {Model} from "../db/models";
 import uuid from 'time-uuid';
 import {IDatabase} from "../db/models/database";
+import {MongoClient, Db} from 'mongodb'
+
+let client: MongoClient, db: Db;
 
 export async function listDbs(userId: ObjectId) {
   return Model.Database.find({userId}).toArray()
@@ -21,6 +24,8 @@ export async function createDb(userId: ObjectId) {
   }
   const {insertedId} = await Model.Database.insertOne(doc)
   // TODO: create user for db
+  db = client.db(doc.name)
+  await db.command({createUser:doc.username, pwd: doc.password, roles:[{role: "dbOwner",db: doc.name}]})
 
   doc._id = insertedId
   return doc;
