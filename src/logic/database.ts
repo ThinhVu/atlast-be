@@ -10,12 +10,11 @@ export async function listDbs(userId: ObjectId) {
 
 export async function createDb(userId: ObjectId) {
   const timestampId = uuid()
-  const username = `u${timestampId}`
-  const password = v4()
+  const password = v4().replaceAll('-', '')
   const doc: IDatabase = {
     userId,
-    name: `${userId}${timestampId}`,
-    username,
+    name: `${timestampId}${userId}`,
+    username: timestampId,
     password,
     sizeInGB: 0,
     createDt: new Date()
@@ -29,4 +28,10 @@ export async function createDb(userId: ObjectId) {
 
 export async function removeDb(userId: ObjectId, dbId: ObjectId) {
   return Model.Database.deleteOne({_id: dbId, userId})
+}
+
+export async function throwIfUserDoesNotOwnDb(userId: ObjectId, dbId: ObjectId) {
+  const count = await Model.Database.countDocuments({_id: dbId, userId})
+  if (count === 1) return true
+  throw new Error("User doesn't own db")
 }
