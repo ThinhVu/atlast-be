@@ -11,24 +11,26 @@ export async function listDbs(userId: ObjectId) {
   return Model.Database.find({userId}).toArray()
 }
 
-export async function createDb(userId: ObjectId) {
+export async function createDb(userId: ObjectId, name: string) {
   const timestampId = uuid()
   const password = v4().replaceAll('-', '')
   const doc: IDatabase = {
     userId,
-    name: `${timestampId}${userId}`,
+    name,
+    dbName: `${timestampId}${userId}`,
     username: timestampId,
     password,
     sizeInGB: 0,
     createDt: new Date()
   }
   const {insertedId} = await Model.Database.insertOne(doc)
-  db = client.db(doc.name)
+  db = client.db(doc.dbName)
+  const col = client.db(doc.dbName).createCollection('col1');
   await db.command({
     createUser:doc.username,
     pwd: doc.password,
     roles:[
-      {role: "dbOwner", db: doc.name}
+      {role: "dbOwner", db: doc.dbName}
     ]
   })
   doc._id = insertedId

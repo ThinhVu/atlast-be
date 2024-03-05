@@ -17,7 +17,8 @@ export default async function useDatabase(parentRouter: Router) {
   router.post('/',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
-      return createDb(req.locals.user._id)
+      const name = req.path_parameters.name
+      return createDb(req.locals.user._id, name)
     }))
 
   router.delete('/:id',
