@@ -23,10 +23,14 @@ export async function createDb(userId: ObjectId) {
     createDt: new Date()
   }
   const {insertedId} = await Model.Database.insertOne(doc)
-  // TODO: create user for db
   db = client.db(doc.name)
-  await db.command({createUser:doc.username, pwd: doc.password, roles:[{role: "dbOwner",db: doc.name}]})
-
+  await db.command({
+    createUser:doc.username,
+    pwd: doc.password,
+    roles:[
+      {role: "dbOwner", db: doc.name}
+    ]
+  })
   doc._id = insertedId
   return doc;
 }
