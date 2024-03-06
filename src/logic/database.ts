@@ -11,7 +11,7 @@ export async function listDbs(userId: ObjectId) {
 
 export async function createDb(userId: ObjectId, name: string) {
   const timestampId = uuid()
-  const password = v4().replaceAll('-', '')
+  const password = Date.now().toString()
   const createDt = new Date()
   const doc: IDatabase = {
     userId,
