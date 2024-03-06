@@ -19,5 +19,5 @@ export function validKey( req: Request<ApiProps>, res: Response, next: Middlewar
         else
             req.locals = { dbApiKey: doc }
         next()
-    }).catch(e => next(new ApiError("E_000", "Invalid API key", 401)))
+    }).catch(e => next(e))
 }
