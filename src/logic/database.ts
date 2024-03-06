@@ -5,7 +5,7 @@ import uuid from 'time-uuid';
 import {IDatabase} from "../db/models/database";
 import {MongoClient, Db} from 'mongodb'
 
-let client: MongoClient, db: Db;
+let client: MongoClient, newDb: Db;
 
 export async function listDbs(userId: ObjectId) {
   return Model.Database.find({userId}).toArray()
@@ -24,15 +24,28 @@ export async function createDb(userId: ObjectId, name: string) {
     createDt: new Date()
   }
   const {insertedId} = await Model.Database.insertOne(doc)
-  db = client.db(doc.dbName)
-  const col = client.db(doc.dbName).createCollection('col1');
-  await db.command({
-    createUser:doc.username,
-    pwd: doc.password,
-    roles:[
-      {role: "dbOwner", db: doc.dbName}
-    ]
-  })
+  try {
+    const {
+      DATABASE_HOST,
+      DATABASE_USERNAME,
+      DATABASE_PASSWORD,
+    } = process.env;
+    const url = DATABASE_USERNAME
+        ? `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}`
+        : `mongodb://${DATABASE_HOST}`;
+    client = new MongoClient(url);
+    newDb = client.db(doc.dbName)
+    await client.db(doc.dbName).createCollection('col1');
+    await newDb.command({
+      createUser:doc.username,
+      pwd: doc.password,
+      roles:[
+        {role: "dbOwner", db: doc.dbName}
+      ]
+    })
+  } catch(e) {
+    console.log('Fail to connect to new database',e)
+  }
   doc._id = insertedId
   return doc;
 }
