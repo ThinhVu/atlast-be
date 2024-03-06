@@ -27,6 +27,11 @@ async function connect() {
    }
 }
 
+export function getDb(name: string) {
+  if (!name) throw new Error("missing db name");
+  return client.db(name);
+}
+
 export default async function mongodb() {
    console.log('[plugin] mongodb')
    await connect()
