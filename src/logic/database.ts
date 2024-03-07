@@ -24,6 +24,7 @@ export async function createDb(userId: ObjectId, name: string) {
     createDt: new Date()
   }
   const {insertedId} = await Model.Database.insertOne(doc)
+
   try {
     const {
       DATABASE_HOST,
@@ -35,7 +36,7 @@ export async function createDb(userId: ObjectId, name: string) {
         : `mongodb://${DATABASE_HOST}`;
     client = new MongoClient(url);
     newDb = client.db(doc.dbName)
-    await client.db(doc.dbName).createCollection('col1');
+    await newDb.createCollection('col1');
     await newDb.command({
       createUser:doc.username,
       pwd: doc.password,
