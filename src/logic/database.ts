@@ -3,9 +3,7 @@ import {v4} from "uuid";
 import {Model} from "../db/models";
 import uuid from 'time-uuid';
 import {IDatabase} from "../db/models/database";
-import {MongoClient, Db} from 'mongodb'
-
-let client: MongoClient, newDb: Db;
+import {getDb} from "../plugins/mongodb";
 
 export async function listDbs(userId: ObjectId) {
   return Model.Database.find({userId}).toArray()
@@ -13,7 +11,8 @@ export async function listDbs(userId: ObjectId) {
 
 export async function createDb(userId: ObjectId, name: string) {
   const timestampId = uuid()
-  const password = v4().replaceAll('-', '')
+  const password = Date.now().toString()
+  const createDt = new Date()
   const doc: IDatabase = {
     userId,
     name,
@@ -21,29 +20,20 @@ export async function createDb(userId: ObjectId, name: string) {
     username: timestampId,
     password,
     sizeInGB: 0,
-    createDt: new Date()
+    createDt,
   }
   const {insertedId} = await Model.Database.insertOne(doc)
-
   try {
-    const {
-      DATABASE_HOST,
-      DATABASE_USERNAME,
-      DATABASE_PASSWORD,
-    } = process.env;
-    const url = DATABASE_USERNAME
-        ? `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}`
-        : `mongodb://${DATABASE_HOST}`;
-    client = new MongoClient(url);
-    newDb = client.db(doc.dbName)
-    await newDb.createCollection('col1');
-    await newDb.command({
-      createUser:doc.username,
+    const db = getDb(doc.dbName);
+    await db.command({
+      createUser: doc.username,
       pwd: doc.password,
       roles:[
         {role: "dbOwner", db: doc.dbName}
       ]
     })
+    await db.createCollection('about');
+    await db.collection('about').insertOne({name, createDt})
   } catch(e) {
     console.log('Fail to connect to new database',e)
   }
@@ -52,6 +42,9 @@ export async function createDb(userId: ObjectId, name: string) {
 }
 
 export async function removeDb(userId: ObjectId, dbId: ObjectId) {
+  const db = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}});
+  if (!db) throw new Error("User doesn't own db");
+  await getDb(db.dbName).dropDatabase();
   return Model.Database.deleteOne({_id: dbId, userId})
 }
 

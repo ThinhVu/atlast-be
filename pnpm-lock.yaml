@@ -15,8 +15,8 @@ dependencies:
     specifier: ^8.1.0
     version: 8.1.0(socket.io-adapter@2.5.2)
   '@tvux/hmmjs':
-    specifier: ^0.69.420
-    version: 0.69.420
+    specifier: ^1.69.420
+    version: 1.69.420
   axios:
     specifier: ^1.6.2
     version: 1.6.7(debug@4.3.4)
@@ -1220,8 +1220,8 @@ packages:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
     dev: true
 
-  /@tvux/hmmjs@0.69.420:
-    resolution: {integrity: sha512-BoR2uRoF5vgoo6RQ0h3OVGVAxLCQ63qJnbgJafmVNWaFv8hp0DqYPd9eSb4mePyIjW3JNHhodVJS0C85g7SyRw==}
+  /@tvux/hmmjs@1.69.420:
+    resolution: {integrity: sha512-+enSWW7f14+m9WcmmPQhZyjNXUX0+FamtrQehpGLLsz/PKY7zhYlKWuOMK4MWkMeV7LkgwYG39LTM90G8fbfWA==}
     dev: false
 
   /@types/babel__core@7.20.0:
