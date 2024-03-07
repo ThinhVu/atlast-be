@@ -13,6 +13,7 @@ import useAppMetrics from './app-metric.route'
 import useDatabase from "./database.route";
 import useApiKey from "./api-key.route";
 import useRunDbCmd from './run-db-cmd.app'
+import usePayment from './payment.route'
 import {Router} from "hyper-express";
 
 export default async function useRoutes(app) {
@@ -33,6 +34,7 @@ export default async function useRoutes(app) {
    await useAppMetrics(router)
    await useDatabase(router)
    await useApiKey(router)
+   await usePayment(router)
 
    app.use('/', router)
 }

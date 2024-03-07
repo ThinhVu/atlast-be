@@ -20,7 +20,7 @@ export const defaultUserInfo = {
 
 // create
 export const createUser = async (data: IUser): Promise<IUser> => {
-  const user: IUser = Object.assign({}, defaultUserInfo, data, {createdAt: new Date()})
+  const user: IUser = Object.assign({}, defaultUserInfo, data, {createdAt: new Date(), balance: 0})
   const {insertedId} = await Model.Users.insertOne(user);
   user._id = insertedId
   return user
