@@ -21,12 +21,14 @@ export const updateBalance = async(_id: ObjectId, amount: number ) => {
             {$inc: {balance: -amount}})
 }
 
-//update payment history
 
+//get payment history
 export const getPaymentHistory = async (userId: ObjectId) => {
     return Model.PaymentHistory.find({userId}).toArray()
 }
 
+
+//update payment history
 export const updatePaymentHistory = async(userId: ObjectId, value: number) => {
     const createDt = new Date()
     const doc: IPaymentHistory = {
