@@ -24,7 +24,7 @@ export const updateBalance = async(_id: ObjectId, amount: number ) => {
 //update payment history
 
 export const getPaymentHistory = async (userId: ObjectId) => {
-    return Model.Users.find({userId}).toArray()
+    return Model.PaymentHistory.find({userId}).toArray()
 }
 
 export const updatePaymentHistory = async(userId: ObjectId, value: number) => {
