@@ -15,6 +15,7 @@ import useApiKey from "./api-key.route";
 import useRunDbCmd from './run-db-cmd.app'
 import usePayment from './payment.route'
 import {Router} from "hyper-express";
+import useDbWebhook from "./db-webhook";
 
 export default async function useRoutes(app) {
    await useHmmApp(app)
@@ -35,6 +36,7 @@ export default async function useRoutes(app) {
    await useDatabase(router)
    await useApiKey(router)
    await usePayment(router)
+   await useDbWebhook(router)
 
    app.use('/', router)
 }

@@ -10,6 +10,7 @@ import {Model} from "../db/models";
 import {getColl} from "./mongodb";
 import {startMongoTop, stopMongoTop} from "../logic/metric/mongotop";
 import {startMongoStats, stopMongoStats} from "../logic/metric/mongostats";
+import {runWatchCollection} from '../mongodb-change-stream/watch-change'
 
 /**
  * https://socket.io/docs/v4/migrating-from-3-x-to-4-0/#the-default-value-of-pingtimeout-was-increased
@@ -199,6 +200,11 @@ async function createSocketServer(app) {
       socket.on('stopMongoStats', () => {
          console.log('Stop getting mongostats');
          stopMongoStats();
+      })
+
+      socket.on('runWatchCollection', () => {
+         console.log('Run change stream webhook')
+         runWatchCollection();
       })
 
       socket.emit("__TEST__", "__TEST__")

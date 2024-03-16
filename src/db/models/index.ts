@@ -19,7 +19,7 @@ import {IUsageMetric} from "./metric/usage-metric"
 import {IMongoStats} from "./metric/mongostats"
 import {IMongoTop} from "./metric/mongotop"
 import {IPaymentHistory} from "./payment-history"
-import {IWebhook} from "./user-webhook"
+import {IDbWebhook} from "./db-webhook"
 export const CollNames = {
   AdminUsers: 'adminusers',
   Announcements: 'announcements',
@@ -43,7 +43,7 @@ export const CollNames = {
   MongoStats: 'mongostats',
   MongoTop: 'mongotop',
   PaymentHistory: 'paymenthistory',
-  Webhook: 'webhook'
+  DbWebhook: 'dbwebhook'
 };
 
 export const Model = {
@@ -107,7 +107,7 @@ export const Model = {
   get PaymentHistory() {
     return getColl<IPaymentHistory>(CollNames.PaymentHistory)
   },
-  get Webhook() {
-    return getColl<IWebhook>(CollNames.Webhook)
+  get DbWebhook() {
+    return getColl<IDbWebhook>(CollNames.DbWebhook)
   }
 }
