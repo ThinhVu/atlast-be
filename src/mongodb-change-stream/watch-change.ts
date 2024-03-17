@@ -1,6 +1,6 @@
 import {getDb} from "../plugins/mongodb";
 import {Model} from "../db/models";
-const {execAxios} = require('../utils');
+const {execAxios} = require('./utils');
 const axios = require('axios');
 
 export async function watchCollection() {

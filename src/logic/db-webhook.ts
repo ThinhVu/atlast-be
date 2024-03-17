@@ -16,7 +16,6 @@ export async function createDbWebHook(userId: ObjectId, data) {
         dbName,
         colName,
         to,
-        createDt,
     }
     const {insertedId} = await Model.DbWebhook.insertOne(doc)
     doc._id = insertedId
@@ -24,7 +23,7 @@ export async function createDbWebHook(userId: ObjectId, data) {
 }
 
 export async function updateDbWebHook(id: ObjectId, change) {
-    return Model.DbWebhook.findOneAndUpdate({_id: id}, change)
+    return Model.DbWebhook.findOneAndUpdate({_id: id}, {$set: change})
 }
 
 export async function deleteDbWebHook(id: ObjectId) {
