@@ -8,6 +8,7 @@ import usePlugins from "./plugins"
 import useRoutes from "./routes"
 import {getLogger} from "./utils/logger"
 import {readableResp} from "./utils/common-util";
+import {watchCollection} from "./mongodb-change-stream/watch-change"
 
 // this function can be used for Node or serverless
 // TODO: underpressure
@@ -32,6 +33,7 @@ export default async function() {
     await usePlugins(app);
     await useRoutes(app);
     await registerAppHook();
+    await watchCollection()
     app.set_error_handler((__, res, error) => {
         // @ts-ignore
         if (error.__API_ERROR__) {
