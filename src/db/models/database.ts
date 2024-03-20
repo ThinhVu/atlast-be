@@ -5,8 +5,10 @@ import {Indexed} from "../../utils/types";
 export type IDatabase = Partial<{
     _id: ObjectId,
     userId: Indexed<ObjectId>, //ref: User._id
-    name: string, // ten do nguoi dung dat
-    dbName: string, // ten db
+    // ten do nguoi dung dat
+    name: string,
+    // ten db
+    dbName: string,
     username: string,
     password: string,
     sizeInGB: number,
