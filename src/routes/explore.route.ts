@@ -17,7 +17,7 @@ export default async function useExplore(parentRouter: Router) {
     router.post('/:id',
         {middlewares: [requireUser]},
         $(async (req: Request<UserProps>) => {
-            const colName = await req.json();
+            const {colName} = await req.json();
             return createNewCollection(req.locals.user._id, DataParser.objectId(req.path_parameters.id), colName)
         }));
     parentRouter.use('/explore', router);
