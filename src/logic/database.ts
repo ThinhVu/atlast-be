@@ -9,13 +9,13 @@ export async function listDbs(userId: ObjectId) {
   return Model.Database.find({userId}).toArray()
 }
 
-export async function createDb(userId: ObjectId, name: string) {
+export async function createDb(userId: ObjectId, alias: string) {
   const timestampId = uuid()
   const password = Date.now().toString()
   const createDt = new Date()
   const doc: IDatabase = {
     userId,
-    name,
+    alias,
     dbName: `${timestampId}${userId}`,
     username: timestampId,
     password,
@@ -33,7 +33,7 @@ export async function createDb(userId: ObjectId, name: string) {
       ]
     })
     await db.createCollection('about');
-    await db.collection('about').insertOne({name, createDt})
+    await db.collection('about').insertOne({alias, createDt})
   } catch(e) {
     console.log('Fail to connect to new database',e)
   }
