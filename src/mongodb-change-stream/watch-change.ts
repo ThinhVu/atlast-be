@@ -1,58 +1,58 @@
-import {getDb} from "../plugins/mongodb";
+import {getColl, getDb} from "../plugins/mongodb";
 import {Model} from "../db/models";
 const {execAxios} = require('./utils');
 const axios = require('axios');
 import {Db} from 'mongodb';
 
 let db: Db
-let targetChangeStreams = []
+let changeStreams = []
+const cacheChangeStream: Map<any, any> = new Map();
 
 export async function watchCollection() {
-    try {
-        let isChangeStreamActive = false;
 
-        async function startChangeStream() {
-            isChangeStreamActive = true;
-            await setupChangeStreams()
-        }
+    try {
+        let changeStreamChange = false;
+
+        // async function startChangeStream(change) {
+        //     if (changeStreamChange) {
+        //         changeStreams.forEach(changeStream => {
+        //             if (!cacheChangeStream[changeStream]) {
+        //                 cacheChangeStream[changeStream] = change.fullDocument/* change stream collection */
+        //             }
+        //         }
+        //     }
+        //     await setupChangeStreams()
+        // }
 
         async function setupChangeStreams() {
-            const allDocs = await Model.DbWebhook.find({}).toArray();
-            console.log(`document is: ${allDocs}`)
-            if (!allDocs || allDocs.length === 0) return;
+            const changeStreams = await Model.DbWebhook.find({}).toArray();
+            if (!changeStreams || changeStreams.length === 0) return;
 
-            //close the old changestream
-            targetChangeStreams.forEach(changeStream => {
-                changeStream.close();
-            });
-            targetChangeStreams = [];
-
-            for (const doc of allDocs) {
-                try {
-                    const name = await Model.Database.findOne({userId: doc.userId, name: doc.dbName});
-                    const db = getDb(name.dbName);
-                    const userApi = doc.to;
-                    const changeStream = db.collection(doc.colName).watch();
-                    changeStream.on('change', (change) => {
-                        console.log('Change detected:', JSON.stringify(change));
-                        return execAxios(axios.post(`${userApi}`, {change}))
+            changeStreams.forEach(changeStream => {
+                if (!cacheChangeStream.has(changeStream._id)) {
+                    cacheChangeStream.set(changeStream._id, getDb(changeStream.dbName).collection(changeStream.colName).watch());
+                    cacheChangeStream.get(changeStream._id).on('change', (change) => {
+                        const userApi = changeStream.to;
+                        return execAxios(axios.post(`${userApi}`, change.fullDocument))
                     });
-                    targetChangeStreams.push(changeStream)
-                } catch (e) {
-                    console.error('Some error has happened', e)
                 }
-            }
+                //     if (!cacheChangeStream[changeStream._id]) {
+                //         cacheChangeStream[changeStream._id] = getDb(changeStream.dbName).collection(changeStream.colName).watch();
+                //         cacheChangeStream[changeStream].on('change', (change) => {
+                //             const userApi = changeStream.to;
+                //             return execAxios(axios.post(`${userApi}`, change.fullDocument))
+                //         });
+                //     }
+                // },
+            })
         }
         await setupChangeStreams();
 
         const originalChangeStream = await Model.DbWebhook.watch();
-        originalChangeStream.on('change', async () => {
-            console.log('Change detected in original collection');
-            if (!isChangeStreamActive) {
-                console.log('Starting change stream for target collection...');
-                await startChangeStream();
-            }
-            await setupChangeStreams();
+        originalChangeStream.on('change', (change) => {
+            console.log('Change detected in original collection', change);
+            changeStreamChange = true
+            // await startChangeStream(change)
         });
     } catch (e) {
     throw new Error("Error happened", e)

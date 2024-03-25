@@ -5,6 +5,7 @@ export type IDbWebhook = Partial<{
     _id: ObjectId;
     userId: Indexed<ObjectId>;
     dbName: string;
+    name: string;
     //database contain collections that they want to watch the changes
     colName: string;
     //collection that they want to watch the changes

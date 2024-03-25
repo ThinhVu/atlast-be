@@ -25,7 +25,10 @@ export default async function useDatabase(parentRouter: Router) {
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
       return removeDb(req.locals.user._id, DataParser.objectId(req.path_parameters.id))
-    }))
+    }));
 
   parentRouter.use('/database', router);
 }
+
+
+

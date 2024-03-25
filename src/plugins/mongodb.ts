@@ -5,13 +5,12 @@ let client: MongoClient, db: Db;
 export function getColl<TSchema = any>(name: string) : Collection<TSchema> {
    return db.collection<TSchema>(name)
 }
-
 async function connect() {
    try {
       const {DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME} = process.env;
       const config = {
         username: DATABASE_USERNAME,
-        password: DATABASE_PASSWORD,
+        password: encodeURIComponent(DATABASE_PASSWORD),
         dbName: DATABASE_NAME
       }
       console.log(`[mongodb] Connecting to database ${DATABASE_NAME}`)
@@ -35,12 +34,12 @@ export function connectMongoClient(config: ConnectClientConfig) {
   if (!dbHost) throw new Error("Missing DATABASE_HOST env variable")
   const {username, password, dbName} = config;
   const url = username
-    ? `mongodb://${username}:${password}@${dbHost}?authSource=${dbName}`
+    ? `mongodb://${username}:${password}@${dbHost}?authSource=admin`
     : `mongodb://${dbHost}?authSource=${dbName}`;
   client = new MongoClient(url);
   return client;
 }
-
+   // ? `mongodb://${username}:${password}@${dbHost}?authSource=${dbName}`
 export function getDb(name: string) {
   if (!name) throw new Error("missing db name");
   return client.db(name);

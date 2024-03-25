@@ -10,13 +10,15 @@ export async function listDbWebHook(userId: ObjectId) {
 
 export async function createDbWebHook(userId: ObjectId, data) {
     const createDt = new Date()
-    const {dbName, colName, to} = data;
-    const id = await Model.Database.find({userId: userId, dbName: dbName})
+    const {name, colName, to} = data;
+    const {dbName} = await Model.Database.findOne({userId: userId, name: name})
     const doc: IDbWebhook = {
         userId,
         dbName,
+        name,
         colName,
         to,
+        createDt
     }
     const {insertedId} = await Model.DbWebhook.insertOne(doc)
     doc._id = insertedId
