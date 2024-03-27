@@ -45,6 +45,7 @@ export async function removeDb(userId: ObjectId, dbId: ObjectId) {
   const db = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}});
   if (!db) throw new Error("User doesn't own db");
   await getDb(db.dbName).dropDatabase();
+  await Model.DbWebhook.deleteMany({dbName: db})
   return Model.Database.deleteOne({_id: dbId, userId})
 }
 

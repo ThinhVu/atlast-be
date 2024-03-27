@@ -35,12 +35,15 @@ export function connectMongoClient(config: ConnectClientConfig) {
   const {username, password, dbName} = config;
   const dbHostContainsConfig = dbHost.indexOf('?')
   const url = username
-    ? `mongodb://${username}:${password}@${dbHost}${dbHostContainsConfig ? '&' : '?'}authSource=admin`
+    ? `mongodb://${username}:${password}@${dbHost}?authSource=admin`
     : `mongodb://${dbHost}?authSource=${dbName}`;
   client = new MongoClient(url);
   return client;
 }
-   // ? `mongodb://${username}:${password}@${dbHost}?authSource=${dbName}`
+
+//`mongodb://${username}:${password}@${dbHost}${dbHostContainsConfig ? '&' : '?'}authSource=admin`
+//url kiểu này không chạy được
+
 export function getDb(name: string) {
   if (!name) throw new Error("missing db name");
   return client.db(name);

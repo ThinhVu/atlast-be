@@ -18,8 +18,9 @@ export async function watchCollection() {
       if (_.isEmpty(changeStreams)) return;
       for (const changeStream of changeStreams) {
         const watcher = getDb(changeStream.dbName).collection(changeStream.colName).watch();
-        watcher.on('change', (change) => axios.post(`${changeStream.to}`, change.fullDocument));
-        changeStreamCache.set(changeStream._id, watcher);
+        const webhookURL = changeStream.to
+        watcher.on('change', (change) => axios.post(`${webhookURL}`, change));
+        changeStreamCache.set(changeStream._id, {webhookURL,watcher});
       }
     }
 
@@ -30,24 +31,29 @@ export async function watchCollection() {
       // find watcher -> stop  1 - 1 (dbName_collName)
       // xoa watcher di
       // xem operator la gi: insert, delete, update
-      const operator = ''
-      const doc = change.fullDocument;
+      const operator = change.operationType
+      //const doc = change;
       switch (operator) {
         case 'insert':
-          if (changeStreamCache.get(doc._id)) {
-            // ??
-          }
+          // if (changeStreamCache.get(change.documentKey._id)) {
+          //   changeStreamCache.get(change.documentKey._id).webhookURL = change.fullDocument.to
+          //   changeStreamCache.get(change.documentKey._id).watcher = getDb(change.fullDocument.dbName).collection(change.fullDocument.colName).watch()
+          // }
+          const webhookURL = change.fullDocument.to;
+          const watcher = getDb(change.fullDocument.dbName).collection(change.fullDocument.colName).watch();
+          watcher.on('change', (change) => axios.post(`${webhookURL}`, change));
+          changeStreamCache.set(change.documentKey._id, {webhookURL,watcher});
           break;
         case 'update':
-          if (changeStreamCache.get(doc._id)) {
+          if (changeStreamCache.get(change.documentKey._id)) {
             // TODO: assign nhung thong tin can thiet
-            changeStreamCache.get(doc._id).webhookURL = doc.webhookURL
+            changeStreamCache.get(change.documentKey._id).webhookURL = change.updateDescription.updatedFields.to
           }
           break;
         case 'delete':
-          if (changeStreamCache.get(doc._id)) {
-            changeStreamCache.get(doc._id).watcher.close()
-            changeStreamCache.delete(doc._id)
+          if (changeStreamCache.get(change.documentKey._id)) {
+            changeStreamCache.get(change.documentKey._id).watcher.close()
+            changeStreamCache.delete(change.documentKey._id)
           }
           break;
       }

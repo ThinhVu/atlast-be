@@ -14,3 +14,14 @@ export async function createNewCollection(userId: ObjectId, dbId: ObjectId, colN
     await db.collection(colName).insertOne({deleted: true})
     await db.collection(colName).deleteOne()
 }
+
+export async function deleteCollection(userId: ObjectId, dbId: ObjectId, colName: string) {
+    const {dbName} = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}});
+    const db = getDb(dbName)
+    const isWebhookExist = await Model.DbWebhook.find({dbName: db, colName: colName})
+    if (isWebhookExist) {
+        throw new Error("User doesn't delete related webhook")
+    } else {
+       return await db.dropCollection(colName)
+    }
+}
