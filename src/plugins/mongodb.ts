@@ -33,7 +33,7 @@ export function connectMongoClient(config: ConnectClientConfig) {
   const dbHost = process.env.DATABASE_HOST
   if (!dbHost) throw new Error("Missing DATABASE_HOST env variable")
   const {username, password, dbName} = config;
-  const dbHostContainsConfig = dbHost.indexOf('?')
+  //const dbHostContainsConfig = dbHost.indexOf('?')
   const url = username
     ? `mongodb://${username}:${password}@${dbHost}?authSource=admin`
     : `mongodb://${dbHost}?authSource=${dbName}`;
