@@ -8,7 +8,6 @@ import usePlugins from "./plugins"
 import useRoutes from "./routes"
 import {getLogger} from "./utils/logger"
 import {readableResp} from "./utils/common-util";
-import useChangeStream from "./mongodb-change-stream"
 
 // this function can be used for Node or serverless
 // TODO: underpressure
@@ -32,7 +31,6 @@ export default async function() {
     app.use(cors());
     await usePlugins(app);
     await useRoutes(app);
-    await useChangeStream(app);
     await registerAppHook();
     app.set_error_handler((__, res, error) => {
         // @ts-ignore

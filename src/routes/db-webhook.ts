@@ -1,12 +1,14 @@
 import {Request, Router} from "hyper-express";
 import {requireUser, UserProps} from "../middlewares/auth";
 import $ from "../utils/safe-call";
-import {listDbWebHook, createDbWebHook, updateDbWebHook, deleteDbWebHook} from "../logic/db-webhook";
+import {listDbWebHook, createDbWebHook, updateDbWebHook, deleteDbWebHook, watchCollection} from "../logic/db-webhook";
 import DataParser from "../utils/data-parser";
 
 export default async function useDbWebhook(parentRouter: Router) {
     console.log('[route] useDbWebhook')
     const router = new Router();
+
+    watchCollection()
 
     router.get('/',
         {middlewares: [requireUser]},
