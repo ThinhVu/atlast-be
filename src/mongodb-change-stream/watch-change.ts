@@ -2,9 +2,9 @@ import axios from 'axios';
 import _ from 'lodash';
 import {getDb} from "../plugins/mongodb";
 import {Model} from "../db/models";
-import {ObjectId} from "mongodb";
+import {IDbWebhook} from "../db/models/db-webhook";
 
-const changeStreamCache: Map<ObjectId, ChangeStreamCacheValue> = new Map();
+const changeStreamCache: Map<string, ChangeStreamCacheValue> = new Map();
 
 type ChangeStreamCacheValue = {
   webhookURL: string,
@@ -13,54 +13,56 @@ type ChangeStreamCacheValue = {
 
 export async function watchCollection() {
   try {
-    async function setupChangeStreams() {
-      const changeStreams = await Model.DbWebhook.find().toArray();
-      if (_.isEmpty(changeStreams)) return;
-      for (const changeStream of changeStreams) {
-        const watcher = getDb(changeStream.dbName).collection(changeStream.colName).watch();
-        const webhookURL = changeStream.to
-        watcher.on('change', (change) => axios.post(`${webhookURL}`, change));
-        changeStreamCache.set(changeStream._id, {webhookURL,watcher});
+    function initWatcher(dbWebHook: IDbWebhook) {
+      const watcher = getDb(dbWebHook.dbName).collection(dbWebHook.colName).watch();
+      const webhookURL = dbWebHook.to
+      watcher.on('change', (change) => axios.post(`${webhookURL}`, change));
+      changeStreamCache.set(dbWebHook._id.toString(), {webhookURL,watcher});
+    }
+
+    async function setupWatchers() {
+      const dbWebHooks = await Model.DbWebhook.find().toArray();
+      if (_.isEmpty(dbWebHooks)) return;
+      for (const dbWebHook of dbWebHooks) {
+        initWatcher(dbWebHook)
       }
     }
 
-    const originalChangeStream = await Model.DbWebhook.watch();
-    originalChangeStream.on('change', (change) => {
+    const dbWebHookChangeStream = Model.DbWebhook.watch();
+    dbWebHookChangeStream.on('change', (change) => {
       console.log('Change detected in original collection', change);
       // db nao? collection nao?
       // find watcher -> stop  1 - 1 (dbName_collName)
       // xoa watcher di
       // xem operator la gi: insert, delete, update
       const operator = change.operationType
-      //const doc = change;
       switch (operator) {
         case 'insert':
-          // if (changeStreamCache.get(change.documentKey._id)) {
-          //   changeStreamCache.get(change.documentKey._id).webhookURL = change.fullDocument.to
-          //   changeStreamCache.get(change.documentKey._id).watcher = getDb(change.fullDocument.dbName).collection(change.fullDocument.colName).watch()
-          // }
-          const webhookURL = change.fullDocument.to;
-          const watcher = getDb(change.fullDocument.dbName).collection(change.fullDocument.colName).watch();
-          watcher.on('change', (change) => axios.post(`${webhookURL}`, change));
-          changeStreamCache.set(change.documentKey._id, {webhookURL,watcher});
+          initWatcher(change.fullDocument)
           break;
-        case 'update':
-          if (changeStreamCache.get(change.documentKey._id)) {
+        case 'update': {
+          const key = change.documentKey._id.toString()
+          const cached = changeStreamCache.get(key)
+          if (cached) {
             // TODO: assign nhung thong tin can thiet
-            changeStreamCache.get(change.documentKey._id).webhookURL = change.updateDescription.updatedFields.to
+            cached.webhookURL = change.updateDescription.updatedFields.to
           }
           break;
-        case 'delete':
-          if (changeStreamCache.get(change.documentKey._id)) {
-            changeStreamCache.get(change.documentKey._id).watcher.close()
-            changeStreamCache.delete(change.documentKey._id)
+        }
+        case 'delete': {
+          const key = change.documentKey._id.toString()
+          const cached = changeStreamCache.get(key)
+          if (cached) {
+            cached.watcher.close()
+            changeStreamCache.delete(key)
           }
           break;
+        }
       }
     });
 
 
-    await setupChangeStreams();
+    await setupWatchers();
   } catch (e) {
     throw new Error("Error happened", e)
   }
