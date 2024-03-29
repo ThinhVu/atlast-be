@@ -41,9 +41,6 @@ export function connectMongoClient(config: ConnectClientConfig) {
   return client;
 }
 
-//`mongodb://${username}:${password}@${dbHost}${dbHostContainsConfig ? '&' : '?'}authSource=admin`
-//url kiểu này không chạy được
-
 export function getDb(name: string) {
   if (!name) throw new Error("missing db name");
   return client.db(name);
