@@ -44,7 +44,6 @@ export async function watchCollection() {
           const key = change.documentKey._id.toString()
           const cached = changeStreamCache.get(key)
           if (cached) {
-            // TODO: assign nhung thong tin can thiet
             cached.webhookURL = change.updateDescription.updatedFields.to
           }
           break;
