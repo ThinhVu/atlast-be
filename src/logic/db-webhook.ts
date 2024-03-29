@@ -5,7 +5,7 @@ import uuid from 'time-uuid';
 import {IDbWebhook} from '../db/models/db-webhook'
 
 export async function listDbWebHook(dbId: ObjectId) {
-    const {dbName} = await Model.Database.findOne({_id: dbId})
+    const {dbName} = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}})
     return Model.DbWebhook.find({dbName: dbName}).toArray()
 }
 
@@ -24,8 +24,8 @@ export async function createDbWebHook(dbId: ObjectId, data) {
     return doc;
 }
 
-export async function updateDbWebHook(id: ObjectId, change) {
-    return Model.DbWebhook.findOneAndUpdate({_id: id}, {$set: change})
+export async function updateDbWebHook(id: ObjectId, to) {
+    return Model.DbWebhook.updateOne({_id: id}, {$set:{to: to}})
 }
 
 export async function deleteDbWebHook(id: ObjectId) {

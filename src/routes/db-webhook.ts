@@ -21,11 +21,11 @@ export default async function useDbWebhook(parentRouter: Router) {
             return createDbWebHook(DataParser.objectId(req.path_parameters.dbId), data)
         }))
 
-    router.post('/:id',
+    router.post('/:dbId/:id',
         {middlewares: [requireUser]},
         $(async (req: Request<UserProps>) => {
-            const change = await req.json();
-            return updateDbWebHook(DataParser.objectId(req.path_parameters.id), change)
+            const {to} = await req.json();
+            return updateDbWebHook(DataParser.objectId(req.path_parameters.id), to)
         }))
 
     router.delete('/:id',
