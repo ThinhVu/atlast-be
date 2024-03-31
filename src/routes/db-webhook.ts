@@ -10,25 +10,24 @@ export default async function useDbWebhook(parentRouter: Router) {
 
     watchCollection()
 
-    router.get('/',
+    router.get('/:dbId',
         {middlewares: [requireUser]},
         $(async (req: Request<UserProps>) => {
-            return listDbWebHook(req.locals.user._id)
+            return listDbWebHook(DataParser.objectId(req.path_parameters.dbId))
         }))
 
-    router.post('/',
+    router.post('/:dbId',
         {middlewares: [requireUser]},
         $(async (req: Request<UserProps>) => {
             const data = await req.json();
-            return createDbWebHook(req.locals.user._id, data)
+            return createDbWebHook(DataParser.objectId(req.path_parameters.dbId), data)
         }))
 
-
-    router.post('/:id',
+    router.post('/:dbId/:id',
         {middlewares: [requireUser]},
         $(async (req: Request<UserProps>) => {
-            const change = await req.json();
-            return updateDbWebHook(DataParser.objectId(req.path_parameters.id), change)
+            const {to} = await req.json();
+            return updateDbWebHook(DataParser.objectId(req.path_parameters.id), to)
         }))
 
     router.delete('/:id',

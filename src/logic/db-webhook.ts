@@ -5,28 +5,28 @@ import {ObjectId} from "mongodb";
 import {Model} from "../db/models";
 import {IDbWebhook} from '../db/models/db-webhook'
 
-export async function listDbWebHook(userId: ObjectId) {
-  return Model.DbWebhook.find({userId}).toArray()
+export async function listDbWebHook(dbId: ObjectId) {
+    const {dbName} = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}})
+    return Model.DbWebhook.find({dbName: dbName}).toArray()
 }
 
-export async function createDbWebHook(userId: ObjectId, data: IDbWebhook) {
-  const {dbName, colName, desc, to} = data;
-  const db = await Model.Database.findOne({userId, dbName})
-  if (!db) throw new Error(`Database is not existed`)
-  const doc: IDbWebhook = {
-    dbName,
-    colName,
-    desc,
-    to,
-    createDt: new Date()
-  }
-  const {insertedId} = await Model.DbWebhook.insertOne(doc)
-  doc._id = insertedId
-  return doc;
+export async function createDbWebHook(dbId: ObjectId, data) {
+    const createDt = new Date()
+    const {colName, to} = data;
+    const {dbName} = await Model.Database.findOne({_id: dbId})
+    const doc: IDbWebhook = {
+        dbName,
+        colName,
+        to,
+        createDt
+    }
+    const {insertedId} = await Model.DbWebhook.insertOne(doc)
+    doc._id = insertedId
+    return doc;
 }
 
-export async function updateDbWebHook(id: ObjectId, change: IDbWebhook) {
-  return Model.DbWebhook.findOneAndUpdate({_id: id}, {$set: change})
+export async function updateDbWebHook(id: ObjectId, to) {
+    return Model.DbWebhook.updateOne({_id: id}, {$set:{to: to}})
 }
 
 export async function deleteDbWebHook(id: ObjectId) {
