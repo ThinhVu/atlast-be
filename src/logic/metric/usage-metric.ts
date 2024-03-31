@@ -16,7 +16,7 @@ export async function usageEstimate () {
         const id = item._id
         const databaseDoc = await Model.Database.findOne({_id: id});
         if (databaseDoc) {
-            const dbName = databaseDoc.name;
+            const dbName = databaseDoc.dbName;
             try {
                 db = client.db(dbName)
                 const statics = await db.stats({scale: 1024*1024*1024});
