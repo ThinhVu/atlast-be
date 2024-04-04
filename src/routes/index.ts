@@ -17,6 +17,7 @@ import usePayment from './payment.route'
 import {Router} from "hyper-express";
 import useDbWebhook from "./db-webhook";
 import useExplore from "./explore.route"
+import useUserCol from "./user-collection.route"
 
 export default async function useRoutes(app) {
    await useHmmApp(app)
@@ -39,6 +40,7 @@ export default async function useRoutes(app) {
    await usePayment(router)
    await useDbWebhook(router)
    await useExplore(router)
+   await useUserCol(router)
 
    app.use('/', router)
 }

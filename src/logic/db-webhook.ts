@@ -5,28 +5,27 @@ import {ObjectId} from "mongodb";
 import {Model} from "../db/models";
 import {IDbWebhook} from '../db/models/db-webhook'
 
-export async function listDbWebHook(dbId: ObjectId) {
-    const {dbName} = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}})
-    return Model.DbWebhook.find({dbName: dbName}).toArray()
+export async function listDbWebHook(dbId: ObjectId, colName: string) {
+  const {dbName} = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}})
+  return Model.DbWebhook.find({dbName: dbName, colName: colName}).toArray()
 }
 
-export async function createDbWebHook(dbId: ObjectId, data) {
-    const createDt = new Date()
-    const {colName, to} = data;
-    const {dbName} = await Model.Database.findOne({_id: dbId})
-    const doc: IDbWebhook = {
-        dbName,
-        colName,
-        to,
-        createDt
-    }
-    const {insertedId} = await Model.DbWebhook.insertOne(doc)
-    doc._id = insertedId
-    return doc;
+export async function createDbWebHook(dbId: ObjectId, colName, to) {
+  const createDt = new Date()
+  const {dbName} = await Model.Database.findOne({_id: dbId})
+  const doc: IDbWebhook = {
+    dbName,
+    colName: colName,
+    to,
+    createDt
+  }
+  const {insertedId} = await Model.DbWebhook.insertOne(doc)
+  doc._id = insertedId
+  return doc;
 }
 
 export async function updateDbWebHook(id: ObjectId, to) {
-    return Model.DbWebhook.updateOne({_id: id}, {$set:{to: to}})
+  return Model.DbWebhook.updateOne({_id: id}, {$set: {to: to}})
 }
 
 export async function deleteDbWebHook(id: ObjectId) {
@@ -83,7 +82,6 @@ export async function watchCollection() {
         }
       }
     });
-
     await setupWatchers();
   } catch (e) {
     throw new Error("Error happened", e)

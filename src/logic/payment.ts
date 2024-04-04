@@ -3,7 +3,6 @@ import {Model} from "../db/models";
 import {IPaymentHistory} from "../db/models/payment-history"
 
 
-
 //get balance
 export const getCurrentBalance = async (_id: ObjectId) => {
     return Model.Users.findOne({_id})
@@ -12,13 +11,13 @@ export const getCurrentBalance = async (_id: ObjectId) => {
 //deposit money
 export const depositMoney = async (_id: ObjectId, amount: number) => {
     await Model.Users.updateOne({_id},
-        {$inc: {balance: amount}})
+      {$inc: {balance: amount}})
 }
 
 //update balance after payment
-export const updateBalance = async(_id: ObjectId, amount: number ) => {
-        return Model.Users.updateOne({_id},
-            {$inc: {balance: -amount}})
+export const updateBalance = async (_id: ObjectId, amount: number) => {
+    return Model.Users.updateOne({_id},
+      {$inc: {balance: -amount}})
 }
 
 
@@ -29,7 +28,7 @@ export const getPaymentHistory = async (userId: ObjectId) => {
 
 
 //update payment history
-export const updatePaymentHistory = async(userId: ObjectId, value: number) => {
+export const updatePaymentHistory = async (userId: ObjectId, value: number) => {
     const createDt = new Date()
     const doc: IPaymentHistory = {
         userId,
