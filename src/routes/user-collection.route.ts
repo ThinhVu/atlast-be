@@ -14,7 +14,7 @@ export default async function useUserCol(parentRouter: Router) {
     $(async (req: Request<UserProps>) => {
       const dbId = DataParser.objectId(req.path_parameters.dbId)
       const colName = DataParser.str(req.path_parameters.col)
-      const page = DataParser.number(req.path_parameters.page,1)
+      const page = DataParser.number(req.path_parameters.page, 1)
       return getDocs(dbId, colName, page)
     }));
 
