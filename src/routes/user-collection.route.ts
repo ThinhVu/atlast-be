@@ -15,7 +15,7 @@ export default async function useUserCol(parentRouter: Router) {
       const userId = req.locals.user._id
       const dbId = DataParser.objectId(req.path_parameters.dbId)
       const colName = DataParser.str(req.path_parameters.col)
-      const page = DataParser.number(req.path_parameters.page,1)
+      const page = DataParser.number(req.path_parameters.page, 1)
       return getDocs(userId, dbId, colName, page)
     }));
 

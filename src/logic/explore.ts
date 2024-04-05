@@ -7,14 +7,7 @@ export async function getDbCollection(dbId: ObjectId) {
   const {dbName} = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}});
   const db = getDb(dbName)
   console.log('getDbCollection', dbName)
-  try {
-    await delay(500)
-    const rs = await db.listCollections().toArray()
-    return rs;
-  } catch (e) {
-    console.error(e)
-    return []
-  }
+  return db.listCollections().toArray()
 }
 
 export async function createNewCollection(dbId: ObjectId, colName: string) {

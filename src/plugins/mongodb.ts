@@ -27,18 +27,18 @@ export type ConnectClientConfig = {
   username?: string,
   password?: string,
   dbName: string,
+  authSource?: string
 }
 
 export function connectMongoClient(config: ConnectClientConfig) {
   const dbHost = process.env.DATABASE_HOST
   if (!dbHost) throw new Error("Missing DATABASE_HOST env variable")
-  const {username, password, dbName} = config;
+  const {username, password, dbName, authSource} = config;
   const dbHostContainsConfig = dbHost.indexOf('?')
   const url = username
-    ? `mongodb://${username}:${password}@${dbHost}${dbHostContainsConfig ? '&' : '?'}authSource=admin`
+    ? `mongodb://${username}:${password}@${dbHost}${dbHostContainsConfig ? '&' : '?'}authSource=${authSource || 'admin'}`
     : `mongodb://${dbHost}?authSource=${dbName}`;
-  client = new MongoClient(url);
-  return client;
+  return new MongoClient(url);
 }
 
 export function getDb(name: string) {
