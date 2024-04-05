@@ -1,13 +1,22 @@
 import {Request, Router} from "hyper-express";
 import {requireUser, UserProps} from "../middlewares/auth";
 import $ from "../utils/safe-call";
-import {createNewDoc, deleteDoc, updateDoc, getDocs, connectDb} from "../logic/user-collection";
+import {createNewDoc, deleteDoc, updateDoc, getDocs, countDocs} from "../logic/user-collection";
 import DataParser from "../utils/data-parser";
 
 
 export default async function useUserCol(parentRouter: Router) {
   console.log('[route] useUserCol')
   const router = new Router();
+
+  router.get('/:dbId/:col',
+    {middlewares: [requireUser]},
+    $(async (req: Request<UserProps>) => {
+      const userId = req.locals.user._id
+      const dbId = DataParser.objectId(req.path_parameters.dbId)
+      const colName = DataParser.str(req.path_parameters.col)
+      return countDocs(userId, dbId, colName)
+    }));
 
   router.get('/:dbId/:col/:page',
     {middlewares: [requireUser]},
@@ -22,7 +31,7 @@ export default async function useUserCol(parentRouter: Router) {
   router.post('/:dbId/:col',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
-      const doc = await req.json();
+      const doc = req.json()
       const userId = req.locals.user._id
       const dbId = DataParser.objectId(req.path_parameters.dbId)
       const colName = DataParser.str(req.path_parameters.col)

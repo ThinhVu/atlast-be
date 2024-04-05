@@ -68,3 +68,9 @@ export async function getDocs(userId: ObjectId ,dbId: ObjectId, colName: string,
   const skip = (page - 1) * pageSize;
   return collection.find().skip(skip).limit(pageSize).toArray();
 }
+
+export async function countDocs(userId: ObjectId, dbId: ObjectId, colName: string) {
+  const db = await connectDb(userId, dbId);
+  const collection = db.collection(colName);
+  return collection.countDocuments();
+}
