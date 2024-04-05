@@ -38,10 +38,10 @@ export default async function useUserCol(parentRouter: Router) {
       return createNewDoc(userId, dbId, colName, doc)
     }));
 
-  router.post('/dbId/:col/:id',
+  router.post('/:dbId/:col/:id',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
-      const doc = req.json()
+      const doc = await req.json()
       const userId = req.locals.user._id
       const dbId = DataParser.objectId(req.path_parameters.dbId)
       const colName = DataParser.str(req.path_parameters.col)
@@ -49,7 +49,7 @@ export default async function useUserCol(parentRouter: Router) {
       return updateDoc(userId, dbId, colName, id, doc)
     }));
 
-  router.delete('/dbId/:col/:id',
+  router.delete('/:dbId/:col/:id',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
       const userId = req.locals.user._id

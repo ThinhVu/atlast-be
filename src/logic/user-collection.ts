@@ -30,7 +30,7 @@ export async function deleteDoc(userId: ObjectId, dbId: ObjectId, colName: strin
 }
 
 export async function updateDoc(userId: ObjectId, dbId: ObjectId, colName: string, docId: ObjectId, doc) {
-  await connectDb(userId, dbId);
+  const db = await connectDb(userId, dbId);
   const collection = db.collection(colName);
   await collection.updateOne({_id: docId}, {$set:doc})
   await getFieldNames(doc)
