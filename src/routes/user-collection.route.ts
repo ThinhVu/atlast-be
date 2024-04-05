@@ -31,7 +31,7 @@ export default async function useUserCol(parentRouter: Router) {
   router.post('/:dbId/:col',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
-      const doc = req.json()
+      const {doc} = await req.json();
       const userId = req.locals.user._id
       const dbId = DataParser.objectId(req.path_parameters.dbId)
       const colName = DataParser.str(req.path_parameters.col)

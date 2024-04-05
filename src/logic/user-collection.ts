@@ -16,9 +16,11 @@ export async function connectDb(userId: ObjectId, dbId: ObjectId) {
 
 export async function createNewDoc(userId, dbId: ObjectId, colName: string, doc) {
   const db = await connectDb(userId, dbId);
+  const correctedJSONString = doc.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ');
+  const jsonObject = JSON.parse(correctedJSONString);
   const collection = db.collection(colName);
-  await collection.insertOne(doc)
-  await getFieldNames(userId, dbId, colName, doc)
+  await collection.insertOne(jsonObject)
+  await getFieldNames(jsonObject)
 }
 
 export async function deleteDoc(userId: ObjectId, dbId: ObjectId, colName: string, docId: ObjectId) {
@@ -31,10 +33,10 @@ export async function updateDoc(userId: ObjectId, dbId: ObjectId, colName: strin
   await connectDb(userId, dbId);
   const collection = db.collection(colName);
   await collection.updateOne({_id: docId}, {$set:doc})
-  await getFieldNames(userId, dbId, colName, doc)
+  await getFieldNames(doc)
 }
 
-export async function getFieldNames(userId: ObjectId, dbId: ObjectId, colName: string, doc) {
+export async function getFieldNames(doc) {
   Object.keys(doc).forEach(field => {
     if (!cache.has(field)) {
       cache.add(field);
