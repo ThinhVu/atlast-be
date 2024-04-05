@@ -43,6 +43,7 @@ export function connectMongoClient(config: ConnectClientConfig) {
 
 export function getDb(name: string) {
   if (!name) throw new Error("missing db name");
+  if (!client) throw new Error("connection is not ready yet");
   return client.db(name);
 }
 
