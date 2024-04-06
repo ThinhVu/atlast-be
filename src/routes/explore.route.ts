@@ -21,11 +21,10 @@ export default async function useExplore(parentRouter: Router) {
       return createNewCollection(DataParser.objectId(req.path_parameters.id), colName)
     }));
 
-  router.delete('/:id',
+  router.delete('/:id/:col',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
-      const {colName} = await req.json();
-      return deleteCollection(DataParser.objectId(req.path_parameters.id), colName)
+      return deleteCollection(DataParser.objectId(req.path_parameters.id), DataParser.str(req.path_parameters.col))
     }));
 
   parentRouter.use('/explore', router);
