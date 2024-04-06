@@ -8,4 +8,5 @@ export type IDbWebhook = Partial<{
     desc: string;
     to: string; //link to user api;
     createDt: Date; //the day user register the webhook service
+    enable: boolean;
 }>

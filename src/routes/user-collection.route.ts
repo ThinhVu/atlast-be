@@ -38,7 +38,7 @@ export default async function useUserCol(parentRouter: Router) {
       return createNewDoc(userId, dbId, colName, doc)
     }));
 
-  router.post('/:dbId/:col/:id',
+  router.put('/:dbId/:col/:id',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
       const doc = await req.json()

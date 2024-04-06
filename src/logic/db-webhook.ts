@@ -4,6 +4,7 @@ import {getDb} from "../plugins/mongodb";
 import {ObjectId} from "mongodb";
 import {Model} from "../db/models";
 import {IDbWebhook} from '../db/models/db-webhook'
+import DataParser from "../utils/data-parser";
 
 export async function listDbWebHook(dbId: ObjectId, colName: string) {
   const {dbName} = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}})
@@ -17,15 +18,17 @@ export async function createDbWebHook(dbId: ObjectId, colName, to) {
     dbName,
     colName: colName,
     to,
-    createDt
+    createDt,
+    enable: true,
   }
   const {insertedId} = await Model.DbWebhook.insertOne(doc)
   doc._id = insertedId
   return doc;
 }
 
-export async function updateDbWebHook(id: ObjectId, to) {
-  return Model.DbWebhook.updateOne({_id: id}, {$set: {to: to}})
+
+export async function updateDbWebHook(id: ObjectId, change) {
+  return Model.DbWebhook.updateOne({_id: id}, change)
 }
 
 export async function deleteDbWebHook(id: ObjectId) {
@@ -57,20 +60,42 @@ export async function watchCollection() {
 
   try {
     const dbWebHookChangeStream = Model.DbWebhook.watch();
-    dbWebHookChangeStream.on('change', (change) => {
+    dbWebHookChangeStream.on('change', async (change) => {
+      console.log(`change docs: ${JSON.stringify(change)}`)
       const operator = change.operationType
       switch (operator) {
         case 'insert':
           initWatcher(change.fullDocument)
           break;
+
         case 'update': {
           const key = change.documentKey._id.toString()
-          const cached = changeStreamCache.get(key)
-          if (cached) {
-            cached.webhookURL = change.updateDescription.updatedFields.to
+          const isEnable = change.updateDescription.updatedFields.enable
+          if (isEnable !== null || undefined) {
+            const cached = changeStreamCache.get(key)
+            if (isEnable === true) {
+              // if (!cached.watcher) {
+              //   const doc = await Model.DbWebhook.findOne({_id: DataParser.objectId(key)})
+              //   const watcher = getDb(doc.dbName).collection(doc.colName).watch();
+              //   const webhookURL = doc.to
+              //   watcher.on('change', (change) => axios.post(`${webhookURL}`, change));
+              //   cached.watcher = watcher;
+              //   cached.webhookURL = webhookURL
+              // } else {
+                cached.watcher.on('change', (change) => axios.post(`${cached.webhookURL}`, change))
+              // }
+            } else {
+              cached.watcher.close()
+            }
+          } else {
+            const cached = changeStreamCache.get(key)
+            if (cached) {
+              cached.webhookURL = change.updateDescription.updatedFields.to
+            }
           }
           break;
         }
+
         case 'delete': {
           const key = change.documentKey._id.toString()
           const cached = changeStreamCache.get(key)
