@@ -40,7 +40,10 @@ type ChangeStreamCacheValue = {
   webhookURL: string,
   watcher: any, // TODO
 }
+
+
 const changeStreamCache: Map<string, ChangeStreamCacheValue> = new Map();
+const resumeCache: Map<string, any> = new Map()
 
 export async function watchCollection() {
   function initWatcher(dbWebHook: IDbWebhook) {
@@ -74,17 +77,13 @@ export async function watchCollection() {
           if (isEnable !== null || undefined) {
             const cached = changeStreamCache.get(key)
             if (isEnable === true) {
-              // if (!cached.watcher) {
-              //   const doc = await Model.DbWebhook.findOne({_id: DataParser.objectId(key)})
-              //   const watcher = getDb(doc.dbName).collection(doc.colName).watch();
-              //   const webhookURL = doc.to
-              //   watcher.on('change', (change) => axios.post(`${webhookURL}`, change));
-              //   cached.watcher = watcher;
-              //   cached.webhookURL = webhookURL
-              // } else {
-                cached.watcher.on('change', (change) => axios.post(`${cached.webhookURL}`, change))
-              // }
+              const doc = await Model.DbWebhook.findOne({_id: DataParser.objectId(key)})
+              const resumeCached = resumeCache.get(key)
+              cached.watcher = getDb(doc.dbName).collection(doc.colName).watch([], {resumeAfter: resumeCached.resumeToken});;
+              cached.watcher.on('change', (change) => axios.post(`${cached.webhookURL}`, change))
             } else {
+              const resumeToken = (change._id as any)._data;
+              resumeCache.set(key, resumeToken)
               cached.watcher.close()
             }
           } else {
