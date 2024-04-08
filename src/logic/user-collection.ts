@@ -3,46 +3,28 @@ import {Model} from '../db/models';
 import {connectMongoClient} from "../plugins/mongodb";
 import {Db, MongoClient} from 'mongodb';
 
-let db: Db
-let client: MongoClient
-let cache = new Set()
-
 export async function connectDb(userId: ObjectId, dbId: ObjectId) {
   const {username, password, dbName} = await Model.Database.findOne({_id: dbId, userId: userId});
   const mongoClient = connectMongoClient({username, password, dbName, authSource: dbName})
   return mongoClient.db(dbName);
 }
 
-
-export async function createNewDoc(userId, dbId: ObjectId, colName: string, doc) {
+export async function createDoc(userId, dbId: ObjectId, colName: string, doc: any) {
   const db = await connectDb(userId, dbId);
-  const correctedJSONString = doc.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ');
-  const jsonObject = JSON.parse(correctedJSONString);
   const collection = db.collection(colName);
-  await collection.insertOne(jsonObject)
-  await getFieldNames(jsonObject)
+  return await collection.insertOne(doc)
+}
+
+export async function updateDoc(userId: ObjectId, dbId: ObjectId, colName: string, docId: ObjectId, doc) {
+  const db = await connectDb(userId, dbId);
+  const collection = db.collection(colName);
+  return await collection.updateOne({_id: docId}, {$set:doc})
 }
 
 export async function deleteDoc(userId: ObjectId, dbId: ObjectId, colName: string, docId: ObjectId) {
   const db = await connectDb(userId, dbId);
   const collection = db.collection(colName);
   await collection.deleteOne({_id: docId})
-}
-
-export async function updateDoc(userId: ObjectId, dbId: ObjectId, colName: string, docId: ObjectId, doc) {
-  const db = await connectDb(userId, dbId);
-  const collection = db.collection(colName);
-  await collection.updateOne({_id: docId}, {$set:doc})
-  await getFieldNames(doc)
-}
-
-export async function getFieldNames(doc) {
-  Object.keys(doc).forEach(field => {
-    if (!cache.has(field)) {
-      cache.add(field);
-    }
-  });
-  return cache
 }
 
 export async function getDocs(userId: ObjectId ,dbId: ObjectId, colName: string, page: number) {

@@ -1,7 +1,7 @@
 import {Request, Router} from "hyper-express";
 import {requireUser, UserProps} from "../middlewares/auth";
 import $ from "../utils/safe-call";
-import {createNewDoc, deleteDoc, updateDoc, getDocs, countDocs} from "../logic/user-collection";
+import {createDoc, deleteDoc, updateDoc, getDocs, countDocs} from "../logic/user-collection";
 import DataParser from "../utils/data-parser";
 
 
@@ -35,7 +35,7 @@ export default async function useUserCol(parentRouter: Router) {
       const userId = req.locals.user._id
       const dbId = DataParser.objectId(req.path_parameters.dbId)
       const colName = DataParser.str(req.path_parameters.col)
-      return createNewDoc(userId, dbId, colName, doc)
+      return createDoc(userId, dbId, colName, doc)
     }));
 
   router.put('/:dbId/:col/:id',
