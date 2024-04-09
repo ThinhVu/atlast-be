@@ -49,7 +49,16 @@ export async function watchCollection() {
   function initWatcher(dbWebHook: IDbWebhook) {
     const watcher = getDb(dbWebHook.dbName).collection(dbWebHook.colName).watch();
     const webhookURL = dbWebHook.to
-    watcher.on('change', (change) => axios.post(`${webhookURL}`, change));
+    watcher.on('change', (change) => {
+      axios.post(`${webhookURL}`, change)
+      const operator = change.operationType
+      if (operator==="drop") {
+        watcher.close()
+        const dbName = change.ns.db
+        const colName = change.ns.coll
+        return Model.DbWebhook.deleteMany({dbName: dbName, colName: colName})
+      }
+    });
     changeStreamCache.set(dbWebHook._id.toString(), {webhookURL, watcher});
   }
 
@@ -70,16 +79,15 @@ export async function watchCollection() {
         case 'insert':
           initWatcher(change.fullDocument)
           break;
-
         case 'update': {
           const key = change.documentKey._id.toString()
           const isEnable = change.updateDescription.updatedFields.enable
-          if (isEnable !== null || undefined) {
+          if (isEnable !== undefined) {
             const cached = changeStreamCache.get(key)
             if (isEnable === true) {
               const doc = await Model.DbWebhook.findOne({_id: DataParser.objectId(key)})
               const resumeCached = resumeCache.get(key)
-              cached.watcher = getDb(doc.dbName).collection(doc.colName).watch([], {resumeAfter: resumeCached.resumeToken});;
+              cached.watcher = getDb(doc.dbName).collection(doc.colName).watch([], {resumeAfter: resumeCached.resumeToken});
               cached.watcher.on('change', (change) => axios.post(`${cached.webhookURL}`, change))
             } else {
               const resumeToken = (change._id as any)._data;
@@ -90,6 +98,7 @@ export async function watchCollection() {
             const cached = changeStreamCache.get(key)
             if (cached) {
               cached.webhookURL = change.updateDescription.updatedFields.to
+              cached.watcher.on('change', (change) => axios.post(`${cached.webhookURL}`, change))
             }
           }
           break;
