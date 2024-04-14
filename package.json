@@ -15,7 +15,7 @@
     "@axiomhq/winston": "^0.1.2",
     "@socket.io/mongo-adapter": "^0.3.0",
     "@socket.io/redis-adapter": "^8.1.0",
-    "@tvux/hmmjs": "^1.69.420",
+    "@tvux/hmmjs": "^2.69.420",
     "axios": "^1.6.2",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.20.2",

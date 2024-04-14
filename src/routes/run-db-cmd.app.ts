@@ -5,6 +5,8 @@ import jsonFn from 'json-fn';
 import {Request, Response} from "hyper-express"
 import {Model} from "../db/models";
 import {connectMongoClient} from "../plugins/mongodb";
+import {requireUser, UserProps} from "../middlewares/auth";
+import DataParser from "../utils/data-parser";
 
 const dbDriverCache = {}
 
@@ -30,6 +32,34 @@ export default async function userRunCommand(app) {
         const str = await req.text();
         const qry = jsonFn.parse(str, true);
         const rs = await hmm(qry)
+        res.json(rs)
+      } catch (e: any) {
+        console.error('[run-db-cmd]', e)
+        res.status(400).json({error: e.message})
+      }
+    })
+
+  app.post('/execute-db-cmd/:dbId',
+    {middlewares: [requireUser]},
+    async (req: Request<UserProps>, res: Response) => {
+      try {
+        const uid = req.locals.user._id;
+        const dbId = req.path_parameters.dbId;
+        if (!dbDriverCache[dbId]) {
+          const database = await Model.Database.findOne({_id: DataParser.objectId(dbId), userId: uid});
+          const {username, password, dbName} = database;
+          const mongoClient = connectMongoClient({username, password, dbName, authSource: dbName})
+          const db = mongoClient.db(dbName);
+          dbDriverCache[dbId] = new Proxy({}, {
+            get(__, collectionName: string | symbol, ___): any {
+              return db.collection(collectionName as string)
+            }
+          })
+        }
+        const hmm = hmmExecFactory(dbDriverCache[dbId]);
+        const str = await req.text();
+        const qry = jsonFn.parse(str, true);
+        const rs = await hmm(qry);
         res.json(rs)
       } catch (e: any) {
         console.error('[run-db-cmd]', e)
