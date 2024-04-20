@@ -18,6 +18,7 @@ import {Router} from "hyper-express";
 import useDbWebhook from "./db-webhook";
 import useExplore from "./explore.route"
 import useUserCol from "./user-collection.route"
+import useCluster from "./cluster.route";
 
 export default async function useRoutes(app) {
    await useHmmApp(app)
@@ -41,6 +42,7 @@ export default async function useRoutes(app) {
    await useDbWebhook(router)
    await useExplore(router)
    await useUserCol(router)
+   await useCluster(router)
 
    app.use('/', router)
 }

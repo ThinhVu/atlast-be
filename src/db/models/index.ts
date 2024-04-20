@@ -20,6 +20,7 @@ import {IMongoStats} from "./metric/mongostats"
 import {IMongoTop} from "./metric/mongotop"
 import {IPaymentHistory} from "./payment-history"
 import {IDbWebhook} from "./db-webhook"
+import {IDbCluster} from "./db-cluster";
 export const CollNames = {
   AdminUsers: 'adminusers',
   Announcements: 'announcements',
@@ -43,7 +44,8 @@ export const CollNames = {
   MongoStats: 'mongostats',
   MongoTop: 'mongotop',
   PaymentHistory: 'paymenthistory',
-  DbWebhook: 'dbwebhook'
+  DbWebhook: 'dbwebhook',
+  DbCluster: 'dbcluster',
 };
 
 export const Model = {
@@ -109,5 +111,8 @@ export const Model = {
   },
   get DbWebhook() {
     return getColl<IDbWebhook>(CollNames.DbWebhook)
+  },
+  get DbCluster() {
+    return getColl<IDbCluster>(CollNames.DbCluster)
   }
 }

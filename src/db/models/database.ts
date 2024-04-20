@@ -4,9 +4,10 @@ import {Indexed} from "../../utils/types";
 
 export type IDatabase = Partial<{
     _id: ObjectId,
-    userId: Indexed<ObjectId>, //ref: User._id
-    alias: string, // ten do nguoi dung dat
-    dbName: string, // real dbName
+    userId: Indexed<ObjectId>, // ref: User._id
+    clusterId: Indexed<ObjectId>, // ref: DbCluster._id
+    alias: string, // friendly name
+    dbName: string,
     username: string,
     password: string,
     sizeInGB: number,
