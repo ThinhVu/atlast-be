@@ -1,6 +1,7 @@
 import semver from 'semver';
+import {IPatch} from "./patch";
 
-export default {
+const demo: IPatch = {
    patchId: 'demo@v1',
    shouldRun: (currentVersion: string) => semver.lte(currentVersion, '0.0.1'),
    alwaysRun: false,
@@ -10,3 +11,4 @@ export default {
    }
 }
 
+export default demo
