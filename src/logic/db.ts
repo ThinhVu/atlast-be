@@ -9,13 +9,14 @@ export async function listDbs(userId: ObjectId) {
   return Model.Database.find({userId}).toArray()
 }
 
-export async function createDb(userId: ObjectId, alias: string) {
+export async function createDb(userId: ObjectId, alias: string, clusterId: ObjectId) {
   const timestampId = uuid()
   const password = Date.now().toString()
   const createDt = new Date()
   const doc: IDatabase = {
     userId,
     alias,
+    clusterId,
     dbName: `${timestampId}${userId}`,
     username: timestampId,
     password,

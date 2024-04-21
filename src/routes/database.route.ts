@@ -1,7 +1,7 @@
 import {Request, Router} from "hyper-express";
 import {requireUser, UserProps} from "../middlewares/auth";
 import $ from "../utils/safe-call";
-import {listDbs, createDb, removeDb} from "../logic/database";
+import {listDbs, createDb, removeDb} from "../logic/db";
 import DataParser from "../utils/data-parser";
 
 export default async function useDatabase(parentRouter: Router) {
@@ -17,8 +17,8 @@ export default async function useDatabase(parentRouter: Router) {
   router.post('/',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
-        const {alias} = await req.json();
-        return createDb(req.locals.user._id, alias)
+        const {alias, clusterId} = await req.json();
+        return createDb(req.locals.user._id, alias, DataParser.objectId(clusterId))
     }))
 
   router.delete('/:id',

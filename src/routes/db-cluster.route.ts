@@ -5,7 +5,7 @@ import DataParser from "../utils/data-parser";
 import {
   getAllClusters, getMyCluster, getSharedCluster,
   create, update, remove,
-} from "../logic/cluster";
+} from "../logic/db-cluster";
 
 
 export default async function useCluster(parentRouter: Router) {
@@ -21,7 +21,7 @@ export default async function useCluster(parentRouter: Router) {
   )
 
   router.get(
-    '/shared-clusters',
+    '/shared',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
       return getSharedCluster()
@@ -29,7 +29,7 @@ export default async function useCluster(parentRouter: Router) {
   )
 
   router.get(
-    '/my-clusters',
+    '/mine',
     {middlewares: [requireUser]},
     $(async (req: Request<UserProps>) => {
       return getMyCluster(req.locals.user._id)

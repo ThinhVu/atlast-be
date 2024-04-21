@@ -3,7 +3,7 @@ import {requireUser, UserProps} from "../middlewares/auth";
 import $ from "../utils/safe-call";
 import To from "../utils/data-parser";
 import {lists, create, update, remove} from "../logic/api-key";
-import {throwIfUserDoesNotOwnDb} from "../logic/database";
+import {throwIfUserDoesNotOwnDb} from "../logic/db";
 
 export default async function useDatabase(parentRouter: Router) {
   console.log('[route] useDatabase')
