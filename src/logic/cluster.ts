@@ -2,17 +2,16 @@ import {ObjectId} from "mongodb";
 import {IDbCluster} from "../db/models/db-cluster";
 import {Model} from "../db/models";
 
-
 export async function getAllClusters(): Promise<Array<IDbCluster>> {
-  return Model.DbCluster.find().toArray()
+  return Model.DbCluster.find({}, {projection: {auth: -1}}).toArray()
 }
 
 export async function getSharedCluster() {
-  return Model.DbCluster.find({userId: { $exists: false }}).toArray()
+  return Model.DbCluster.find({userId: { $exists: false }}, {projection: {auth: -1}}).toArray()
 }
 
 export async function getMyCluster(uid: ObjectId) {
-  return Model.DbCluster.find({userId: uid}).toArray()
+  return Model.DbCluster.find({userId: uid}, {projection: {auth: -1}}).toArray()
 }
 
 export async function create(payload: IDbCluster) {

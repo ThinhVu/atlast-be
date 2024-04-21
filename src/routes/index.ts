@@ -18,7 +18,7 @@ import {Router} from "hyper-express";
 import useDbWebhook from "./db-webhook";
 import useExplore from "./explore.route"
 import useUserCol from "./user-collection.route"
-import useCluster from "./cluster.route";
+import useCluster from "./db-cluster.route";
 
 export default async function useRoutes(app) {
    await useHmmApp(app)
