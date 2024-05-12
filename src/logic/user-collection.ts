@@ -1,8 +1,8 @@
 import {ObjectId} from "mongodb";
 import {Model} from '../db/models';
-import {connectMongoClient} from "../plugins/mongodb";
 import {Db} from 'mongodb';
 import dayjs from 'dayjs';
+import {connectMongoClient} from "./db-cluster";
 
 const dbCache = new Map<string, {db: Db, expireAt: Date}>();
 

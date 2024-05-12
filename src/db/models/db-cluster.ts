@@ -6,10 +6,15 @@ export type IDbCluster = Partial<{
   userId: Indexed<ObjectId | undefined>, //ref: User._id
   name: string,
   desc: string,
-  nodes: Array<string>,
+  dbHost: string,
   auth: {
     username: string,
     password: string
+  },
+  config: {
+    replicaSet: string,
+    w: string,
+    readPreference: string,
   },
   price: number; //
   createDt: Date

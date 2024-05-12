@@ -4,9 +4,9 @@ import hmmExecFactory from '@tvux/hmmjs';
 import jsonFn from 'json-fn';
 import {Request, Response} from "hyper-express"
 import {Model} from "../db/models";
-import {connectMongoClient} from "../plugins/mongodb";
 import {requireUser, UserProps} from "../middlewares/auth";
 import DataParser from "../utils/data-parser";
+import {connectMongoClient} from "../logic/db-cluster";
 
 const dbDriverCache = {}
 

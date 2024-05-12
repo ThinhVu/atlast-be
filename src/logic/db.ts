@@ -1,53 +1,80 @@
-import {ObjectId} from "mongodb";
-//import {v4} from "uuid";
-import {Model} from "../db/models";
 import uuid from 'time-uuid';
+import {ObjectId} from "mongodb";
+import {Model} from "../db/models";
 import {IDatabase} from "../db/models/database";
-import {getDb} from "../plugins/mongodb";
+import {getClusterConnectionFactory} from "./db-connection-factory";
 
 export async function listDbs(userId: ObjectId) {
   return Model.Database.find({userId}).toArray()
 }
 
 export async function createDb(userId: ObjectId, alias: string, clusterId: ObjectId) {
-  const timestampId = uuid()
-  const password = Date.now().toString()
-  const createDt = new Date()
+  const cluster = await Model.DbCluster.findOne({_id: clusterId})
+  if (!cluster) throw new Error("Cluster is not exist");
+
+  const timestampId = uuid();
+  const dbName = `${timestampId}${userId}`;
+  const username = timestampId;
+  const password = Date.now().toString();
+  const createDt = new Date();
+
+  const {auth, dbHost} = cluster
+  const ccf = getClusterConnectionFactory(clusterId.toString())
+  const client = ccf.connectMongoClient({
+    dbHost,
+    dbName: 'admin',
+    username: auth.username,
+    password: auth.password,
+    config: {
+      authSource: 'admin',
+    }
+  })
+  const db = client.db(dbName);
+  await db.command({
+    createUser: username,
+    pwd: password,
+    roles:[
+      { role: "dbOwner", db: dbName }
+    ]
+  })
+  await db.createCollection('info');
+  await db.collection('info').insertOne({alias, createDt})
+
   const doc: IDatabase = {
     userId,
-    alias,
     clusterId,
-    dbName: `${timestampId}${userId}`,
+    alias,
+    dbName,
     username: timestampId,
-    password,
+    password: Date.now().toString(),
     sizeInGB: 0,
     createDt,
   }
   const {insertedId} = await Model.Database.insertOne(doc)
-  try {
-    const db = getDb(doc.dbName);
-    await db.command({
-      createUser: doc.username,
-      pwd: doc.password,
-      roles:[
-        {role: "dbOwner", db: doc.dbName}
-      ]
-    })
-    await db.createCollection('about');
-    await db.collection('about').insertOne({alias, createDt})
-  } catch(e) {
-    console.log('Fail to connect to new database',e)
-  }
   doc._id = insertedId
   return doc;
 }
 
 export async function removeDb(userId: ObjectId, dbId: ObjectId) {
-  const db = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}});
-  if (!db) throw new Error("User doesn't own db");
-  await Model.DbWebhook.deleteMany({dbName: db.dbName})
-  await getDb(db.dbName).dropDatabase();
-  return Model.Database.deleteOne({_id: dbId, userId})
+  const dbInfo = await Model.Database.findOne({_id: dbId}, {projection: {dbName: 1}});
+  if (!dbInfo) throw new Error("User doesn't own db");
+  const cluster = await Model.DbCluster.findOne({_id: dbInfo.clusterId})
+  if (!cluster) throw new Error("Cluster is not exist");
+  const {auth, dbHost} = cluster;
+  const ccf = getClusterConnectionFactory(cluster._id.toString())
+  const client = ccf.connectMongoClient({
+    dbHost,
+    dbName: 'admin',
+    username: auth.username,
+    password: auth.password,
+    config: {
+      authSource: 'admin',
+    }
+  })
+  const db = client.db(dbInfo.dbName);
+  await db.dropDatabase();
+  await Model.DbWebhook.deleteMany({dbName: dbInfo.dbName});
+  await Model.Database.deleteOne({_id: dbId, userId});
 }
 
 export async function throwIfUserDoesNotOwnDb(userId: ObjectId, dbId: ObjectId) {

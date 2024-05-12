@@ -1,4 +1,4 @@
-import {ObjectId} from "mongodb";
+import {MongoClient, ObjectId} from "mongodb";
 import {IDbCluster} from "../db/models/db-cluster";
 import {Model} from "../db/models";
 

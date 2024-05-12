@@ -1,53 +1,34 @@
-import {MongoClient, Db, Collection} from 'mongodb';
+import {Collection, Db} from 'mongodb';
+import {getClusterConnectionFactory} from "../logic/db-connection-factory";
 
-let client: MongoClient, db: Db;
+let db: Db;
 
-export function getColl<TSchema = any>(name: string) : Collection<TSchema> {
-   return db.collection<TSchema>(name)
-}
-async function connect() {
-   try {
-      const {DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME} = process.env;
-      const config = {
-        username: DATABASE_USERNAME,
-        password: encodeURIComponent(DATABASE_PASSWORD),
-        dbName: DATABASE_NAME
-      }
-      console.log(`[mongodb] Connecting to database ${DATABASE_NAME}`)
-      client = connectMongoClient(config);
-      db = client.db(DATABASE_NAME);
-      console.log('[mongodb] Connected to server!')
-   } catch (error) {
-      console.error('[mongodb] Failed to connect. Reason:', error)
-      process.exit(1)
-   }
-}
-
-export type ConnectClientConfig = {
-  username?: string,
-  password?: string,
-  dbName: string,
-  authSource?: string
-}
-
-export function connectMongoClient(config: ConnectClientConfig) {
-  const dbHost = process.env.DATABASE_HOST
-  if (!dbHost) throw new Error("Missing DATABASE_HOST env variable")
-  const {username, password, dbName, authSource} = config;
-  const dbHostContainsConfig = dbHost.indexOf('?')
-  const url = username
-    ? `mongodb://${username}:${password}@${dbHost}${dbHostContainsConfig ? '&' : '?'}authSource=${authSource || 'admin'}`
-    : `mongodb://${dbHost}?authSource=${dbName}`;
-  return new MongoClient(url);
-}
-
-export function getDb(name: string) {
-  if (!name) throw new Error("missing db name");
-  if (!client) throw new Error("connection is not ready yet");
-  return client.db(name);
+export function getColl<TSchema = any>(name: string): Collection<TSchema> {
+  return db.collection<TSchema>(name)
 }
 
 export default async function mongodb() {
-   console.log('[plugin] mongodb')
-   await connect()
+  console.log('[plugin] mongodb')
+  try {
+    const {DATABASE_USERNAME, DATABASE_PASSWORD, DATABASE_NAME} = process.env;
+    console.log(`[mongodb] Connecting to database ${DATABASE_NAME}`)
+    const ccf = getClusterConnectionFactory(process.env.DATABASE_HOST)
+    const client = ccf.connectMongoClient({
+      username: DATABASE_USERNAME,
+      password: encodeURIComponent(DATABASE_PASSWORD),
+      dbName: DATABASE_NAME,
+      dbHost: process.env.DATABASE_HOST,
+      config: {
+        authSource: 'admin',
+        w: "majority",
+        appName: "Cluster0",
+        retryWrites: true
+      }
+    })
+    db = client.db(DATABASE_NAME);
+    console.log('[mongodb] Connected to server!')
+  } catch (error) {
+    console.error('[mongodb] Failed to connect. Reason:', error)
+    process.exit(1)
+  }
 }
