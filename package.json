@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@axiomhq/winston": "^0.1.2",
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "@socket.io/mongo-adapter": "^0.3.0",
     "@socket.io/redis-adapter": "^8.1.0",
     "@tvux/hmmjs": "^2.69.420",

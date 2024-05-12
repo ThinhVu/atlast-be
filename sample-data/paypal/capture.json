@@ -1,0 +1,64 @@
+{
+  "id": "8BW911478X7388502",
+  "intent": "CAPTURE",
+  "status": "COMPLETED",
+  "purchase_units": [
+    {
+      "reference_id": "default",
+      "amount": {
+        "currency_code": "USD",
+        "value": "1.00"
+      },
+      "payee": {
+        "email_address": "sb-47xzux1367622@business.example.com",
+        "merchant_id": "U28XM7GDP2Y5Q"
+      },
+      "custom_id": "662e8c89dc003751527dd4e8",
+      "payments": {
+        "captures": [
+          {
+            "id": "141151476C515694W",
+            "status": "PENDING",
+            "status_details": {
+              "reason": "RECEIVING_PREFERENCE_MANDATES_MANUAL_ACTION"
+            },
+            "amount": {
+              "currency_code": "USD",
+              "value": "1.00"
+            },
+            "final_capture": true,
+            "seller_protection": {
+              "status": "ELIGIBLE",
+              "dispute_categories": [
+                "ITEM_NOT_RECEIVED",
+                "UNAUTHORIZED_TRANSACTION"
+              ]
+            },
+            "create_time": "2024-05-12T18:02:56Z",
+            "update_time": "2024-05-12T18:02:56Z"
+          }
+        ]
+      }
+    }
+  ],
+  "payer": {
+    "name": {
+      "given_name": "John",
+      "surname": "Doe"
+    },
+    "email_address": "sb-d49eu1317741@business.example.com",
+    "payer_id": "W8XT6PDX7P87S",
+    "address": {
+      "country_code": "US"
+    }
+  },
+  "create_time": "2024-05-12T18:01:48Z",
+  "update_time": "2024-05-12T18:02:56Z",
+  "links": [
+    {
+      "href": "https://api.sandbox.paypal.com/v2/checkout/orders/8BW911478X7388502",
+      "rel": "self",
+      "method": "GET"
+    }
+  ]
+}

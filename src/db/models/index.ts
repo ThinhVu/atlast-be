@@ -21,6 +21,7 @@ import {IMongoTop} from "./metric/mongotop"
 import {IPaymentHistory} from "./payment-history"
 import {IDbWebhook} from "./db-webhook"
 import {IDbCluster} from "./db-cluster";
+import {IUserBalanceHistory} from "./user-balance-history";
 export const CollNames = {
   AdminUsers: 'adminusers',
   Announcements: 'announcements',
@@ -36,6 +37,7 @@ export const CollNames = {
   Tasks: 'tasks',
   UserMetrics: 'usermetrics',
   Users: 'users',
+  UserBalanceHistories: 'userbalancehistories',
   Verifications: 'verifications',
   DbUsageHistory: 'usagehistory',
   DbApiKey: 'dbapikey',
@@ -84,6 +86,9 @@ export const Model = {
   },
   get Users() {
     return getColl<IUser>(CollNames.Users)
+  },
+  get UserBalanceHistories() {
+    return getColl<IUserBalanceHistory>(CollNames.UserBalanceHistories)
   },
   get Verifications() {
     return getColl<IVerification>(CollNames.Verifications)
