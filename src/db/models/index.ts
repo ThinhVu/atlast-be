@@ -22,6 +22,8 @@ import {IPaymentHistory} from "./payment-history"
 import {IDbWebhook} from "./db-webhook"
 import {IDbCluster} from "./db-cluster";
 import {IUserBalanceHistory} from "./user-balance-history";
+import { IOrder } from "./order";
+import {INodeConfiguration} from "./node-configuration";
 export const CollNames = {
   AdminUsers: 'adminusers',
   Announcements: 'announcements',
@@ -48,6 +50,8 @@ export const CollNames = {
   PaymentHistory: 'paymenthistory',
   DbWebhook: 'dbwebhook',
   DbCluster: 'dbcluster',
+  Order: 'order',
+  NodeConfiguration: 'nodeconfiguration'
 };
 
 export const Model = {
@@ -119,5 +123,11 @@ export const Model = {
   },
   get DbCluster() {
     return getColl<IDbCluster>(CollNames.DbCluster)
+  },
+  get Order() {
+    return getColl<IOrder>(CollNames.Order)
+  },
+  get NodeConfiguration() {
+    return getColl<INodeConfiguration>(CollNames.NodeConfiguration)
   }
 }
